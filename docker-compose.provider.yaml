@@ -1,0 +1,124 @@
+name: law-ohbe-provider
+
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: law_mongodb
+    ports:
+      - '27017:27017'
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: password
+    volumes:
+      - ./docker/docker_data/mongodb_data:/data/db
+    restart: unless-stopped
+    networks:
+      - law_ohbe_net
+
+  redis:
+    image: redis:alpine
+    container_name: law_redis_server
+    ports:
+      - '6379:6379'
+    volumes:
+      - ./docker/docker_data/redis_data:/data
+    restart: unless-stopped
+    networks:
+      - law_ohbe_net
+
+  redis-insight:
+    image: redis/redisinsight:latest
+    container_name: law_redis_insight_ui
+    ports:
+      - '5540:5540'
+    volumes:
+      - ./docker/docker_data/redisinsight_data:/data
+    depends_on:
+      - redis
+    restart: unless-stopped
+    networks:
+      - law_ohbe_net
+
+  kafka:
+    image: bitnamilegacy/kafka
+    container_name: law_kafka_server
+    ports:
+      - '9092:9092'
+      - '29092:29092'
+    environment:
+      - KAFKA_CFG_NODE_ID=0
+      - KAFKA_CFG_PROCESS_ROLES=controller,broker
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://0.0.0.0:9092,CONTROLLER://:9093,EXTERNAL://0.0.0.0:29092
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@127.0.0.1:9093
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://127.0.0.1:9092,EXTERNAL://127.0.0.1:29092
+      - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true
+    volumes:
+      - ./docker/docker_data/kafka_data/bitnami_data:/bitnami/kafka
+    restart: unless-stopped
+    networks:
+      - law_ohbe_net
+
+  loki:
+    image: grafana/loki:2.9.2
+    container_name: law_loki
+    ports:
+      - '3100:3100'
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - ./docker/docker_data/loki_data:/loki
+    restart: unless-stopped
+    networks:
+      - law_ohbe_net
+
+  promtail:
+    image: grafana/promtail:2.9.2
+    container_name: law_promtail
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./docker/promtail_config.yaml:/etc/promtail/config.yaml
+    command: -config.file=/etc/promtail/config.yaml
+    depends_on:
+      - loki
+    restart: unless-stopped
+    networks:
+      - law_ohbe_net
+
+  prometheus:
+    image: prom/prometheus:v3.8.0
+    container_name: law_prometheus
+    ports:
+      - '9090:9090'
+    volumes:
+      - ./docker/prometheus.yaml:/etc/prometheus/prometheus.yaml
+      - ./docker/docker_data/prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yaml'
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    restart: unless-stopped
+    networks:
+      - law_ohbe_net
+
+  grafana:
+    image: grafana/grafana:10.2.0
+    container_name: law_grafana
+    ports:
+      - '3001:3000'
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - ./docker/docker_data/grafana_data:/var/lib/grafana
+    depends_on:
+      - loki
+      - prometheus
+    restart: unless-stopped
+    networks:
+      - law_ohbe_net
+
+networks:
+  law_ohbe_net:
+    driver: bridge
