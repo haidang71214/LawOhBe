@@ -3,21 +3,20 @@ import { Model, Types } from 'mongoose';
 import { BaseSchema, createSchema } from './base.schema/base.schema';
 import { VideoLawCategory } from './enums';
 
-// làm cái video
 @Schema({ timestamps: true, collection: 'Videos' })
 export class Videos extends BaseSchema {
   @Prop({
     type: String,
     enum: Object.values(VideoLawCategory),
+    index: true,
   })
   categories: string;
 
-  // người đăng
-  @Prop({ type: Types.ObjectId, ref: 'User' })
+  // Author reference
+  @Prop({ type: Types.ObjectId, ref: 'User', index: true })
   user_id: Types.ObjectId;
 
   @Prop()
-  // video_url
   video_url: string;
 
   @Prop()
@@ -29,11 +28,14 @@ export class Videos extends BaseSchema {
   @Prop()
   description: string;
 
-  @Prop({ required: true, default: false })
+  @Prop({ required: true, default: false, index: true })
   accept: boolean;
 }
 
 export const VideoSchema = createSchema(Videos);
+VideoSchema.index({ accept: 1, categories: 1 });
+VideoSchema.index({ user_id: 1, accept: 1 });
+
 export const VideosSchema = VideoSchema;
 export const VideoModelName = Videos.name;
 export const VideosModelName = Videos.name;

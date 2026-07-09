@@ -3,14 +3,13 @@ import { Model, Types } from 'mongoose';
 import { BaseSchema, createSchema } from './base.schema/base.schema';
 import { ETypeLawyer } from './enums';
 
-// này là luật sư tạo để setup giá
-// đâyyy,thằng lawyer sẽ lấy cái này ra để setup giá
+// Lawyer custom pricing configuration
 @Schema({ timestamps: true, collection: 'customPrices' })
 export class CustomPrice extends BaseSchema {
-  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true, index: true })
   lawyer_id: Types.ObjectId;
 
-  @Prop({ enum: ETypeLawyer })
+  @Prop({ enum: ETypeLawyer, required: true, index: true })
   type: ETypeLawyer;
 
   @Prop()
@@ -21,6 +20,8 @@ export class CustomPrice extends BaseSchema {
 }
 
 export const CustomPriceSchema = createSchema(CustomPrice);
+CustomPriceSchema.index({ lawyer_id: 1, type: 1 }, { unique: true });
+
 export const CustomPriceModelName = CustomPrice.name;
 export const CustomPriceDestination = {
   name: CustomPriceModelName,

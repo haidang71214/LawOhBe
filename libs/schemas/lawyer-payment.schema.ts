@@ -4,10 +4,10 @@ import { BaseSchema, createSchema } from './base.schema/base.schema';
 
 @Schema({ timestamps: true, collection: 'lawyer_payments' })
 export class LawyerPayment extends BaseSchema {
-  @Prop({ type: Types.ObjectId, ref: 'Payment', required: true })
+  @Prop({ type: Types.ObjectId, ref: 'Payment', required: true, index: true })
   payment_id: Types.ObjectId;
 
-  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true, index: true })
   lawyer_id: Types.ObjectId;
 
   @Prop({ required: true })
@@ -16,13 +16,17 @@ export class LawyerPayment extends BaseSchema {
   @Prop({ required: true })
   commission: number;
 
-  @Prop({ enum: ['pending', 'success', 'failed'], default: 'pending' })
+  @Prop({
+    enum: ['pending', 'success', 'failed'],
+    default: 'pending',
+    index: true,
+  })
   status: string;
 
-  @Prop({ required: true, unique: true, type: String })
+  @Prop({ required: true, unique: true, type: String, index: true })
   transaction_no: string;
 
-  @Prop()
+  @Prop({ index: true })
   payment_date: Date;
 
   @Prop()
@@ -30,6 +34,8 @@ export class LawyerPayment extends BaseSchema {
 }
 
 export const LawyerPaymentSchema = createSchema(LawyerPayment);
+LawyerPaymentSchema.index({ lawyer_id: 1, status: 1 });
+
 export const LawyerPaymentModelName = LawyerPayment.name;
 export const LawyerPaymentDestination = {
   name: LawyerPaymentModelName,

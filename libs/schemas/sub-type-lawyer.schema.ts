@@ -16,6 +16,9 @@ export class SubTypeLawyer extends BaseSchema {
 
   @Prop({ required: false, type: [String] })
   subType: string;
+
+  @Prop({ required: false })
+  name?: string;
 }
 
 export const SubTypeLawyerSchema = createSchema(SubTypeLawyer);

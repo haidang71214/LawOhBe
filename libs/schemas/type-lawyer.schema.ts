@@ -7,7 +7,7 @@ import { ETypeLawyer } from './enums';
   timestamps: true,
   collection: 'type_lawyers',
 })
-// cái này tự tạo sau đó thì nhét hết vô 1 thằng lawyer những cái type này
+// Lawyer specialization type mapping
 export class TypeLawyer extends BaseSchema {
   @Prop({
     type: [String],

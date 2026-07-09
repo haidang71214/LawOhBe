@@ -3,43 +3,47 @@ import { Model, Types } from 'mongoose';
 import { BaseSchema, createSchema } from './base.schema/base.schema';
 import { ETypeLawyer } from './enums';
 
-// tạo 1 bảng booking, người dùng có thể thuê theo ngày, theo tháng hay theo năm với chính thằng luật sư đó, mình sẽ là người ăn hoa hồng
 @Schema({ timestamps: true, collection: 'bookings' })
 export class Booking extends BaseSchema {
-  // Người dùng thuê luật sư
-  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
+  // Client who creates the booking
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true, index: true })
   client_id: Types.ObjectId;
 
-  // Luật sư được thuê
-  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
+  // Lawyer booked
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true, index: true })
   lawyer_id: Types.ObjectId;
 
-  // khi tới quá hạn ngày kết thúc 1 ngày thì tự nhả ra review (chắc làm theo dạng modal)
-  @Prop()
+  @Prop({ index: true })
   booking_start: Date;
 
-  @Prop()
+  @Prop({ index: true })
   booking_end: Date;
 
-  // hàm tự reset sẽ check chỗ booking_end
-  // trong trường hợp done-> thay bằng accept hoặc reject
-  @Prop({ default: 'none', enum: ['none', 'accept', 'reject', 'done'] })
+  @Prop({
+    default: 'pending',
+    enum: ['none', 'pending', 'accept', 'paid', 'reject', 'done', 'cancelled'],
+    index: true,
+  })
   status: string;
 
-  // thêm chỗ thu nhập nếu accept
   @Prop()
   income: number;
+
+  @Prop()
+  amount: number;
 
   @Prop({ enum: ETypeLawyer })
   typeBooking: ETypeLawyer;
 
   @Prop()
-  note: string; // khi user gửi request booking thì
-  // thằng lawyer sẽ dựa trên cái này để accept hoặc reject
-  // lịch cá nhân thì tự sắp xếp
+  note: string;
 }
 
 export const BookingSchema = createSchema(Booking);
+BookingSchema.index({ client_id: 1, lawyer_id: 1 });
+BookingSchema.index({ lawyer_id: 1, typeBooking: 1 });
+BookingSchema.index({ status: 1, booking_end: 1 });
+
 export const BookingModelName = Booking.name;
 export const BookingDestination = {
   name: BookingModelName,

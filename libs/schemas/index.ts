@@ -16,3 +16,5 @@ export * from './message.schema';
 export * from './video.schema';
 export * from './comment.schema';
 export * from './new.schema';
+export * from './notification';
+export * from './messageNotification';

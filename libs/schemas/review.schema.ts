@@ -2,30 +2,31 @@ import { Prop, Schema } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { BaseSchema, createSchema } from './base.schema/base.schema';
 
-// review thì làm như nào để người dùng, dùng xong số ngày đó rồi đánh giá
 @Schema({ timestamps: true, collection: 'reviews' })
 export class Review extends BaseSchema {
-  // Người dùng đánh giá
-  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
-  client_id: Types.ObjectId; // đổi từ user_id qua client_id
+  // Reviewer client reference
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true, index: true })
+  client_id: Types.ObjectId;
 
-  // Luật sư bị đánh giá
-  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
-  // lấy theo cái này
+  // Reviewed lawyer reference
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true, index: true })
   lawyer_id: Types.ObjectId;
 
-  // Số sao đánh giá (1-5)
+  // Rating stars (1-5)
   @Prop({ required: true, min: 1, max: 5 })
   rating: number;
 
   @Prop()
   comment: string;
 
-  @Prop()
+  @Prop({ index: true })
   review_date: Date;
 }
 
 export const ReviewSchema = createSchema(Review);
+ReviewSchema.index({ lawyer_id: 1, client_id: 1 });
+ReviewSchema.index({ lawyer_id: 1, rating: -1 });
+
 export const ReviewModelName = Review.name;
 export const ReviewDestination = {
   name: ReviewModelName,

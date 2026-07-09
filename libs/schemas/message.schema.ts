@@ -2,14 +2,18 @@ import { Prop, Schema } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { BaseSchema, createSchema } from './base.schema/base.schema';
 
-// tạo người nhắn, nhắn tới nhóm nào ? những ai là người đọc?
 @Schema({ timestamps: true, collection: 'messages' })
 export class Message extends BaseSchema {
-  @Prop({ type: Types.ObjectId, ref: 'Conversation', required: true })
+  @Prop({
+    type: Types.ObjectId,
+    ref: 'Conversation',
+    required: true,
+    index: true,
+  })
   conversation: Types.ObjectId;
 
-  // ai gửi ?
-  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
+  // Sender user reference
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true, index: true })
   sender: Types.ObjectId;
 
   @Prop({ required: true })
@@ -20,6 +24,8 @@ export class Message extends BaseSchema {
 }
 
 export const MessageSchema = createSchema(Message);
+MessageSchema.index({ conversation: 1, createdAt: 1 });
+
 export const MessageModelName = Message.name;
 export const MessageDestination = {
   name: MessageModelName,
