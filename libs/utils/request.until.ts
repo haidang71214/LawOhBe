@@ -1,6 +1,6 @@
-import { MetadataKeys } from "libs/constant";
-import { parseToken } from "./string.until";
-import { AuthorizeResponse } from "libs/interfaces/auth/authorize.response";
+import { MetadataKeys } from 'libs/constant';
+import { parseToken } from './string.until';
+import { AuthorizeResponse } from 'libs/interfaces/auth/authorize.response';
 
 export function getAccessToken(request: any, keepBearer = false): string {
   const token = request.headers?.['authorization'];

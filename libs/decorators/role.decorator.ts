@@ -1,5 +1,5 @@
-import { Reflector } from "@nestjs/core";
-import { USER_ROLE } from "libs/constant";
+import { Reflector } from '@nestjs/core';
+import { USER_ROLE } from 'libs/constant';
 
-// ép nó chọn role.
+// Decorator to enforce required user role
 export const RoleDecorator = Reflector.createDecorator<USER_ROLE>();
