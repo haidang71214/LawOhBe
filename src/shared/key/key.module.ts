@@ -1,6 +1,7 @@
-import { Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { KeyService } from './key.service';
 
+@Global()
 @Module({
   providers: [KeyService],
   exports: [KeyService],
