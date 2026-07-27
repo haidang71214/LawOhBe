@@ -10,3 +10,5 @@ export class loginDto {
   @IsNotEmpty()
   password: string;
 }
+
+export class LoginRequestDto extends loginDto {}

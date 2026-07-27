@@ -10,3 +10,5 @@ export class changePass {
   @IsNotEmpty()
   resetToken: string;
 }
+
+export class ChangePassRequestDto extends changePass {}

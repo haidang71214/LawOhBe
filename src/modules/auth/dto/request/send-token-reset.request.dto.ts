@@ -6,3 +6,5 @@ export class SendToken {
   @IsNotEmpty()
   email: string;
 }
+
+export class SendTokenResetRequestDto extends SendToken {}
