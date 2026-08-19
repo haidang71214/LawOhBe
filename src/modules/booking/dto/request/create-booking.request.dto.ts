@@ -1,17 +1,24 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ETypeLawyer } from 'src/config/database.config';
+import { ETypeLawyer } from 'libs/schemas';
 
 export class CreateBookingDto {
-  @ApiProperty()
-  client_id: string;
+  @ApiProperty({ required: false })
+  client_id?: string;
+
   @ApiProperty()
   lawyer_id: string;
+
   @ApiProperty()
   booking_start: Date;
+
   @ApiProperty()
   booking_end: Date;
+
   @ApiProperty({ enum: ETypeLawyer })
   typeBooking: ETypeLawyer;
-  @ApiProperty()
-  note: string;
+
+  @ApiProperty({ required: false })
+  note?: string;
 }
+
+export class CreateBookingRequestDto extends CreateBookingDto {}
