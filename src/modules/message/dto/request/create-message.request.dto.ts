@@ -4,8 +4,12 @@ import { Types } from 'mongoose';
 export class CreateMessageDto {
   @ApiProperty()
   conversationId: Types.ObjectId;
+
   @ApiProperty()
   content: string;
+
   @ApiProperty()
   senderId: Types.ObjectId;
 }
+
+export class CreateMessageRequestDto extends CreateMessageDto {}
