@@ -4,8 +4,9 @@ import { AcceptRejectAction } from 'libs/constant';
 
 export class AcceptRejectDto {
   @ApiProperty({
-    description: 'Lý do từ chối (nếu reject) và gửi email',
-    example: 'Không phù hợp với tiêu chí',
+    description:
+      'Reason for rejection (if reject) or approval note to send via email',
+    example: 'Does not meet the platform guidelines',
   })
   @IsNotEmpty()
   @IsString()
@@ -13,10 +14,12 @@ export class AcceptRejectDto {
 
   @ApiProperty({
     enum: AcceptRejectAction,
-    description: 'Hành động (reject hoặc accept)',
+    description: 'Action (reject or accept)',
     example: AcceptRejectAction.ACCEPT,
   })
   @IsNotEmpty()
   @IsEnum(AcceptRejectAction)
   action: AcceptRejectAction;
 }
+
+export class AcceptRejectVideoRequestDto extends AcceptRejectDto {}
