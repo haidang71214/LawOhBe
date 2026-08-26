@@ -108,20 +108,17 @@ if (thisLawyer.typeLawyer === null || thisLawyer.typeLawyer === undefined ) {
     await Promise.all(
       findTypeForLawyer.type.map(async (type) => {
         typesProcessed.push(type);
-        console.log(`Xử lý type: ${type}`);
 
         const existingPrice = existingCustomPrices.find((cp) => cp.type === type);
 
         if (existingPrice) {
           // Giữ lại type trùng khớp (có thể cập nhật nếu cần)
-          console.log(`Giữ lại type: ${type}`);
           await this.CustomeerPriceModel.updateOne(
             { lawyer_id: userId, type },
             { $set: { price: existingPrice.price } } // giữ lại giá cũ
           );
         } else {
           // Thay thế/Thêm type mới
-          console.log(`Thêm mới type: ${type}`);
           await this.CustomeerPriceModel.updateOne(
             { lawyer_id: userId, type },
             {
@@ -143,7 +140,6 @@ if (thisLawyer.typeLawyer === null || thisLawyer.typeLawyer === undefined ) {
         lawyer_id: userId,
         type: { $in: typesToRemove },
       });
-      console.log(`Đã xóa các type không còn tồn tại: ${typesToRemove}`);
     }
         }
       return{
@@ -279,7 +275,6 @@ async filterLawyers(filterDto: FilterLawyerDto): Promise<{ data: any[], total: n
   if (stars !== undefined) {
     query.star = stars; // Corrected 'start' to 'star'
   }
-  console.log(filterDto);
   
   // Lọc theo loại luật sư
   if (typeLawyer) {
@@ -322,7 +317,6 @@ async filterLawyers(filterDto: FilterLawyerDto): Promise<{ data: any[], total: n
 async getDetailLawyer(id: string) {
   try {
     // Giả sử UserModel có field typeLawyer kiểu ObjectId ref 'TypeLawyer'
-    console.log(id);
     
     const data = await this.UserModel.findById(id)
       .populate({
@@ -334,8 +328,7 @@ async getDetailLawyer(id: string) {
       // Lấy các subtypes của loại luật sư
       const subTypes = await this.SubTypeLawyerModel.find({
         parentType: data.typeLawyer._id,
-      });
-      console.log(data.id); // ??? .id thì được
+      }); // ??? .id thì được
       
       // Lấy giá tiền từ bảng CustomPrice cho luật sư
       const customPrice = await this.CustomeerPriceModel.find({

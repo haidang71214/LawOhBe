@@ -10,4 +10,4 @@ import { TokenControllerService } from './token.utils';
   exports:[TokenControllerService]
   
 })
-export class TokenHeheModule {}
+export class TokenModule {}

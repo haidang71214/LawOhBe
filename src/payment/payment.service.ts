@@ -27,7 +27,6 @@ export class PaymentService {
     const secretKey = process.env.VNP_HASH_SECRET;
     const vnpUrl = process.env.VNP_URL;
     const returnUrl = process.env.VNP_RETURN_URL;
-    console.log('Config:', { secretKey, vnpUrl });
 
     if (!tmnCode || !secretKey || !vnpUrl || !returnUrl) {
       throw new Error('Missing VNPay configuration');
@@ -68,11 +67,6 @@ export class PaymentService {
     const signed = hmac.update(Buffer.from(signData, 'utf-8')).digest('hex');
     sortedParams['vnp_SecureHash'] = signed;
 
-    console.log('vnp_Params:', vnp_Params);
-    console.log('signData:', signData);
-    console.log('vnp_SecureHash:', signed);
-    console.log('Generated URL:', `${vnpUrl}?${qs.stringify(sortedParams, { encode: false })}`);
-
     await this.PaymentModel.findOneAndUpdate({booking_id:bookingId},{
       transaction_no:orderId
     })
@@ -100,12 +94,6 @@ export class PaymentService {
     const signData = qs.stringify(sortedParams, { encode: false });
     const hmac = crypto.createHmac('sha512', secretKey);
     const signed = hmac.update(Buffer.from(signData, 'utf-8')).digest('hex');
-
-    console.log('Received vnp_SecureHash:', secureHash);
-    console.log('Computed vnp_SecureHash:', signed);
-    console.log('Sign data:', signData);
-    console.log('Query params:', sortedParams);
-    console.log('Is valid:', secureHash === signed);
 
     return secureHash === signed;
   }
@@ -135,17 +123,16 @@ export class PaymentService {
       throw new Error(error);
     }
   }
+
   async getUserPayment(userId:string){
     try {
-      console.log(userId);
-      const respone =  await this.PaymentModel.find({client_id:userId})
-      console.log(respone);
-      
-      return respone  
+      const response = await this.PaymentModel.find({client_id:userId})
+      return response  
     } catch (error) {
       throw new Error(error)
     }
   }
+
   async getPaymentSuccessOrFail(id:String) {
     try {
       const response = await this.PaymentModel.findById(id)

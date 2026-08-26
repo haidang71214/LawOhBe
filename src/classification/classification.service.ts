@@ -72,10 +72,8 @@ export class ClassificationService {
       };
         }
       }
-    console.log(lawyerList);
     
     } catch (error) {
-      console.log(error);
       
       if (error instanceof Error && error.message.includes('API')) {
         throw new HttpException(

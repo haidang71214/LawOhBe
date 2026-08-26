@@ -7,12 +7,12 @@ import { KeyModule } from 'src/key/key.module';
 import { JwtModule } from '@nestjs/jwt';
 import { EmailModule } from 'src/email/email.module';
 import { ShareModule } from 'src/shared/sharedModule';
-import { TokenHeheModule } from 'utils/token.module';
+import { TokenModule } from 'utils/token.module';
 
 @Module({
   imports:[
      MongooseModule.forFeature([{ name: User.name, schema: UserSchema },]), 
-     JwtModule.register({}), KeyModule,EmailModule,ShareModule,TokenHeheModule
+     JwtModule.register({}), KeyModule,EmailModule,ShareModule,TokenModule
       ],
   controllers: [AuthController],
   providers: [AuthService],

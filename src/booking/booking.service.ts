@@ -133,7 +133,6 @@ export class BookingService {
              `Luật sư ${lawyerData?.name} đã accept mẫu booking của bạn`,
              `Vui lòng thanh toán chi phí trang web `
            );
-           console.log("Email đã được gửi tới khách hàng.");
          } catch (mailError) {
            console.error("Lỗi khi gửi email:", mailError);
          }
@@ -187,10 +186,8 @@ export class BookingService {
     try {
       // check có phải lawyer không 
       const check = await this.authService.checkLawyer(lawyerid);
-      console.log("check Laywer Result",check);
       
       if(check){
-        console.log(check);
       // reject thì giữ nguyên, không xóa
       const bookingData = await this.BookingModel.findOneAndUpdate({client_id,lawyer_id:lawyerid,_id:new Types.ObjectId(booking_id)},{
           status:"reject"   
@@ -207,7 +204,6 @@ export class BookingService {
             `Luật sư ${lawyerData?.name} đã từ chối mẫu booking của bạn`,
             "Vui lòng tìm luật sư khác phù hợp hơn ạ"
           );
-          console.log("Email đã được gửi tới khách hàng.");
         } catch (mailError) {
           console.error("Lỗi khi gửi email:", mailError);
         }

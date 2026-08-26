@@ -38,13 +38,12 @@ export class FormController {
     }
   }
 // get form
-@Get('heheForm')
+@Get('list')
 async findAll(@Query() dto: FindAllFormDto, @Res() res: Response) {
   try {
     const page = Number(dto.page) || 1;
     const limit = Number(dto.limit) || 10;
     const { type } = dto;
-    console.log(dto); // Should log { page: 1, limit: 10, type: 'INSURANCE' }
     
     const query = this.FormModel.find();
     if (type) {
@@ -55,8 +54,6 @@ async findAll(@Query() dto: FindAllFormDto, @Res() res: Response) {
       .skip((page - 1) * limit)
       .limit(limit)
       .exec();
-    console.log(data); // Should log the query result
-    console.log(query); // Should log the Mongoose query object
     
     return res.status(HttpStatus.OK).json({
       success: true,
@@ -68,7 +65,6 @@ async findAll(@Query() dto: FindAllFormDto, @Res() res: Response) {
       },
     });
   } catch (error) {
-    console.log(error); // Should log any errors
     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       success: false,
       message: `Failed to fetch forms: ${error.message}`,

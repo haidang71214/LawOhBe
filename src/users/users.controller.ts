@@ -178,13 +178,13 @@ const userId = req.user.userId
 
   
   @Get('/getListBookingUser/:id')
-  async findShiet(
+  async getUserBookings(
     @Param('id') id: string,
     @Req() req,
     @Res() res:Response
   ){
 try {
-  const response = await this.usersService.findShiet(id)
+  const response = await this.usersService.getUserBookings(id)
   return res.status(response.status).json(response.data)
 } catch (error) {
   throw new Error(error)

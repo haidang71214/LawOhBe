@@ -43,10 +43,8 @@ export class ChatService {
   };
 
 
-  async checkCoddddddnversation(clientId: String, lawyerId: String) {
+  async checkConversationExists(clientId: String, lawyerId: String) {
     try {
-      console.log(clientId,lawyerId);
-      
       const conversation = await this.conversationModel
         .findOne({
           participants: [clientId, lawyerId]
@@ -54,7 +52,7 @@ export class ChatService {
         .populate('participants')
         .exec();
 
-      return conversation; // Trả về conversation nếu tồn tại, hoặc null nếu không
+      return conversation;
     } catch (error) {
       throw new NotFoundException(`Không tìm thấy cuộc hội thoại giữa ${clientId} và ${lawyerId}`);
     }

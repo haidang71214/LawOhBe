@@ -15,7 +15,7 @@ export class PriceRangeService {
   ){}
 
 // hàm tạo giá cá nhân
-  async createHehe(userId:string,body:CustomPriceRangeDto){
+  async setLawyerCustomPrice(userId:string,body:CustomPriceRangeDto){
     try {
       const checkLaywer = await this.UserModel.findById(userId);
       const {Type,price,description} = body
@@ -111,7 +111,6 @@ const formattedMinPrice = checkPrice?.minPrice.toLocaleString('vi-VN');
         };
       }
       const normalizedType = type.trim().toUpperCase();
-      console.log(`Type được truyền vào: ${normalizedType}`);
       const customPrices = await this.CustomPriceModel.find({ type: normalizedType });
   
       for (const item of customPrices) {

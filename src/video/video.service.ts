@@ -103,8 +103,7 @@ export class VideoService {
       }
 
       const { reason, action } = body;
-      console.log('hehehasjhdaskjhdka',body);
-      
+
       if (action === AcceptRejectAction.REJECT && reason) {
         // Trường hợp reject
         const findRejectVideo = await this.VideosModel.findById(id);
@@ -202,14 +201,11 @@ export class VideoService {
     }
   }
 
-// người đăng xóa video hoặc admin xóa video
  async remove(id: string,userId:String) {
     try {
-// =)))))) khỏi check
       await this.VideosModel.findByIdAndDelete(id)
-      
       return{
-        message:"hehe"
+        message: 'Xóa video thành công'
       }
     } catch (error) {
       throw new Error(error)

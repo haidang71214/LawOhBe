@@ -35,27 +35,25 @@ export class PaymentController {
               orderInfo: orderInfo, 
               updated_at: new Date(),
               amount: amount,
-              client_id: clientId, // Sửa ở đây
-              lawyer_id: lawyerId, // Sửa ở đây
+              client_id: clientId,
+              lawyer_id: lawyerId,
               booking_id:bookingId
             } }
           );
         }
       } else {
-        const newPayment = await this.PaymentModel.create({
+        await this.PaymentModel.create({
           transaction_no: txnRef,
           amount: amount,
-          client_id: clientId, // Sửa ở đây
-          lawyer_id: lawyerId, // Sửa ở đây
-          booking_id:bookingId, // sửa ở đây nữa, vấn đề là nó đang không tạo mới ở ngoài, nó tạo mới ở trong
+          client_id: clientId,
+          lawyer_id: lawyerId,
+          booking_id:bookingId,
           status: 'pending',
           created_at: new Date(),
           orderInfo: orderInfo,
         });
-        console.log('Created new payment record:', newPayment);
       }
   
-      console.log('Payment URL generated:', paymentUrl);
       return res.json({ paymentUrl });
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -67,18 +65,13 @@ export class PaymentController {
     try {
       const isValid = this.paymentService.verifyVnpayReturn(query);
       const responseCode = query['vnp_ResponseCode'] || '00';
-      console.log('Is valid:', isValid);
-      console.log('responseCode:', responseCode);
-      console.log('vnp_TxnRef from query:', query['vnp_TxnRef']);
-// đây, vấn đề là ở đây, nó đang tạo 1 cái transacttion mới, giờ cái chỗ này cần lấy cái trans cũ truyền vô
+
       if (isValid && responseCode === '00') {
         const payment = await this.PaymentModel.findOneAndUpdate(
           { transaction_no: query['vnp_TxnRef'] },
           { status: 'success', payment_date: new Date() },
           { new: true }
         );
-
-        console.log('Payment record found and updated:', payment);
 
         if (!payment) {
           throw new BadRequestException('Payment not found for transaction_no: ' + query['vnp_TxnRef']);
@@ -93,7 +86,6 @@ export class PaymentController {
         return res.redirect(`${URL_PRODUCTION}/payment-result?status=failed&code=${responseCode || '97'}&txnRef=${query['vnp_TxnRef']}`);
       }
     } catch (error) {
-      console.log('Error:', error.message);
       return res.redirect(`${URL_PRODUCTION}/payment-result?status=error&message=${encodeURIComponent('Lỗi khi xử lý phản hồi VNPAY: ' + error.message)}`);
     }
   }
@@ -102,8 +94,6 @@ export class PaymentController {
   async handleVnpayIpn(@Query() query: any, @Res() res: Response) {
     const isValid = this.paymentService.verifyVnpayReturn(query);
     if (isValid) {
-      const orderId = query['vnp_TxnRef'];
-      const rspCode = query['vnp_ResponseCode'] || '00';
       return res.status(200).json({ RspCode: '00', Message: 'Success' });
     } else {
       return res.status(200).json({ RspCode: '97', Message: 'Fail checksum' });
@@ -139,10 +129,11 @@ export class PaymentController {
       throw new Error(error);
     }
   }
+
   @Get('/userGetPayment')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  async getShiitingUser(
+  async getUserPayments(
     @Req() req,
   ){
     try {
@@ -153,8 +144,9 @@ export class PaymentController {
       throw new Error()
     }
   }
+
   @Get('/getPaymentSuccessOrFail/:id')
-  async getFuckingPayment(
+  async getPaymentById(
     @Param('id') id:String,
     @Res() res:Response
   ){

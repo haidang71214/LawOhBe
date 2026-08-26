@@ -72,7 +72,7 @@ export class NewsService {
     }
   }
 
-  async getAllFuckingShit(){
+  async getAllPublicNews(){
     try {
       const response =await this.NewModel.find().populate('userId')
       return response
@@ -104,12 +104,8 @@ export class NewsService {
   async remove(id: string,userId:string) {
    try {
     const checkAdmin = await this.authService.checkAdmin(userId);
-    // check chính người đăng
-    console.log(checkAdmin);
-    
     const findNews = await this.NewModel.findById(id);
     if(checkAdmin || findNews?.userId === new Types.ObjectId(userId)){
-        console.log('đủ điều kiện xóa r');
         const deleteNews = await this.NewModel.findByIdAndDelete(id);
         return deleteNews
     }else{
@@ -117,8 +113,6 @@ export class NewsService {
     }
    } catch (error) {
     throw new Error(error);
-    
-    
    }
   }
 }

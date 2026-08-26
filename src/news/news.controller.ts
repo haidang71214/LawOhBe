@@ -59,7 +59,7 @@ export class NewsController {
   @Res() res:Response
   ){
     try {
-      const response = await this.newsService.getAllFuckingShit();
+      const response = await this.newsService.getAllPublicNews();
       return res.status(200).json(response)
     } catch (error) {
       throw new Error(error)

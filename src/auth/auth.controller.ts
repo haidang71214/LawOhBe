@@ -24,9 +24,9 @@ export class AuthController {
   constructor(private readonly authService: AuthService,
   private readonly cloudUploadService : CloudUploadService,
   @InjectModel(User.name) private readonly userModel: Model<User>, 
-private readonly TokenHeheControllerService: TokenControllerService
+private readonly tokenService: TokenControllerService
   ) {}
-// đăng nhập, trả ra token 
+
   @Post("/loginUser")
   async create(
     @Body() loginDto:loginDto,
@@ -59,7 +59,7 @@ private readonly TokenHeheControllerService: TokenControllerService
   }
 // gửi reset code
   @Post('/ForgotPassWord') 
-  async shiet(
+  async sendForgotPasswordCode(
   @Body() body: SendToken, 
   @Res() res: Response        
   ): Promise<any> {
@@ -128,7 +128,7 @@ private readonly TokenHeheControllerService: TokenControllerService
 
       // Tạo Access Token mới (ví dụ sử dụng một hàm tạo token)
       // ngửi thấy mùi sai ở đây
-      const newAccessToken = this.TokenHeheControllerService.createTokenAsyncKey({ userId: user._id  });
+      const newAccessToken = this.tokenService.createTokenAsyncKey({ userId: user._id  });
 
       return res.status(200).json({ accessToken: newAccessToken });
     } catch (error) {
@@ -141,7 +141,7 @@ private readonly TokenHeheControllerService: TokenControllerService
 @Get('getMySelf')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
-async fuckingGetDetailSelf(
+async getSelf(
   @Req() req,
   @Res() res:Response
 ){

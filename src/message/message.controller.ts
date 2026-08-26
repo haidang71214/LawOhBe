@@ -38,10 +38,10 @@ async createConversation(@Body() createConversationDto: CreateConversationDto) {
     return this.chatService.getMessages(conversationId);
   }
  
-  @Get('/checkConvedddrsation/:lawyerId')
+  @Get('/checkConversation/:lawyerId')
  @UseGuards(JwtAuthGuard)
  @ApiBearerAuth()
-  async checkConverSation(
+  async checkConversation(
     @Param('lawyerId') lawyerId:String,
     @Req() req,
     @Res() res:Response
@@ -49,9 +49,7 @@ async createConversation(@Body() createConversationDto: CreateConversationDto) {
   {
     try {
       const {userId} = req.user
-      console.log(userId,lawyerId);
-      
-      const data = await this.chatService.checkCoddddddnversation(userId,lawyerId)
+      const data = await this.chatService.checkConversationExists(userId,lawyerId)
       return res.status(200).json({data})
     } catch (error) {
       throw new Error(error)

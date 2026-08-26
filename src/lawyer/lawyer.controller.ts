@@ -92,7 +92,6 @@ async getLawyer(@Query() filterDto: FilterLawyerDto, @Res() res: Response) {
       }
     });
   } catch (error) {
-    console.log(error);
     return res.status(500).json({
       message: 'Error fetching lawyers',
       error: error.message
@@ -105,7 +104,6 @@ async getLawyer(@Query() filterDto: FilterLawyerDto, @Res() res: Response) {
     @Res() res: Response,
   ) {
     try {
-      console.log('ID from query:', id);
       const response = await this.lawyerService.getDetailLawyer(id);
       return res.status(200).json({ data: response });
     } catch (error) {

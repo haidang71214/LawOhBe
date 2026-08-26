@@ -34,9 +34,7 @@ export class UsersService {
       message:"Số điện thoại bị trùng lặp"
     }
   }
-  console.log(createUserDto);
-  
-const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+  const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
   // tạo user mới thành công
   const results = await this.user_model.create({
     password:hashedPassword,
@@ -124,10 +122,8 @@ async findOne(id: string) {
 async changeRoleToUser(
   id:string,newRole:string,userId:string
 ){
-  console.log(newRole);
-  
-  const hehe = await this.authService.checkAdmin(userId)
-  if(hehe){
+  const isAdmin = await this.authService.checkAdmin(userId)
+  if(isAdmin){
     const user = await this.user_model.findById(id);
     if (!user) {
       return { status: 404, message: 'User không tồn tại' };
@@ -234,12 +230,11 @@ async updateTheoAdmin(
         message: 'Update thành công',
       };
     } catch (error) {
-      console.log(error);
       throw new Error(error.message || 'Update thất bại');
     }
   }
   
-  async findShiet(userId: string) {
+  async getUserBookings(userId: string) {
     try {
       const bookings = await this.BookingModel.find(
         { client_id: userId }, 

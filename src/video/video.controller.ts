@@ -31,12 +31,12 @@ export class VideoController {
       return res.status(400).json({ message: 'At least one file (video or thumbnail) is required' });
     }
     if(video){
-      const hehe = await this.CloudUploadService.uploadVideo(video,'video');
-      createVideoDto.video_url = hehe.secure_url
+      const videoUploadResult = await this.CloudUploadService.uploadVideo(video,'video');
+      createVideoDto.video_url = videoUploadResult.secure_url
     }
     if(thumbnail){
-      const hoho = await this.CloudUploadService.uploadImage(thumbnail,'thubnail')
-      createVideoDto.thubnail_url = hoho.secure_url
+      const thumbnailUploadResult = await this.CloudUploadService.uploadImage(thumbnail,'thubnail')
+      createVideoDto.thubnail_url = thumbnailUploadResult.secure_url
     }
     const response = await this.videoService.create(createVideoDto,userId);
     return res.status(response.status).json({message:'Tạo thành công'})

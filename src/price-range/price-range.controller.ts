@@ -13,14 +13,14 @@ export class PriceRangeController {
 @Post('/LawyerCustomPrice')
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
-async createFuckingPrice(
+async createCustomPrice(
 @Res() res:Response,
 @Body() body:CustomPriceRangeDto,
 @Req() req
 ){
   try {
     const {userId} = req.user
-    const response = await this.priceRangeService.createHehe(userId,body)
+    const response = await this.priceRangeService.setLawyerCustomPrice(userId,body)
     return res.status(response.status).json(response.message)
   } catch (error) {
     throw new Error(error)

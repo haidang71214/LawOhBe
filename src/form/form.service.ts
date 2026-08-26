@@ -30,7 +30,6 @@
             description,
             type
           })
-          console.log(newFile);
           return {
             status:200,
             message:newFile
