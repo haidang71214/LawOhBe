@@ -15,17 +15,10 @@ async function bootstrap() {
     const peerServer = PeerServer({
       path: "/peerjs"
     });
-    const expressApp = app.getHttpAdapter().getInstance(); // ✅ Lấy instance của Express
-expressApp.use('/peerjs', peerServer); // ✅ Mount PeerServer tại /peerjs
-
-    // Cấu hình global pipes
+    const expressApp = app.getHttpAdapter().getInstance(); 
+expressApp.use('/peerjs', peerServer); 
     app.useGlobalPipes(new ValidationPipe());
- 
-    // Cấu hình CORS
     app.enableCors({
-      //  deploy fe, thay đổi những thứ có ở cái localhost
-      // gán cái fe vào đây
-      // ,'http://localhost:3000'
       origin: [process.env.NODE_ENV === 'production' ? `${URL_PRODUCTION}` : '*','http://localhost:3000'],
       methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
       credentials: true,
@@ -41,17 +34,12 @@ expressApp.use('/peerjs', peerServer); // ✅ Mount PeerServer tại /peerjs
 
     const swagger = SwaggerModule.createDocument(app, configSwagger);
     SwaggerModule.setup('Swagger', app, swagger);
-
-    // Lấy port từ process.env.PORT (Render) hoặc ConfigService
-    // const port = process.env.PORT || configService.get<number>('PORT') || 8080;
-
-    // Khởi tạo và setup Socket.io
     const chatService = app.get(ChatService);
     setupSocketIo(app, chatService);
 
     // Khởi động ứng dụng trên 0.0.0.0 kệ mẹ cái env vì env đéo chạy được
     //process.env.PORT ||
-    const port =  10000; // Mặc định 10000 theo tài liệu Render
+    const port =  8080; // Mặc định 10000 theo tài liệu Render
 await app.listen(port, '0.0.0.0');
 console.log(`Ứng dụng đang chạy trên port: http://0.0.0.0:${port}`);
   } catch (error) {

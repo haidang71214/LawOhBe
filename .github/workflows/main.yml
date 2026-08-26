@@ -1,0 +1,25 @@
+name: Dockerized App Deployment
+on:
+  push:
+    branches: [production]
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy using ssh
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          port: 24700
+          script: |
+            cd /root/lawohprojectBe/testdeploydockercicd
+            git fetch origin
+            git checkout production
+            git pull
+            docker-compose build
+            docker build -t lawoh
+            docker stop lawoh-container || true  
+            docker rm lawoh-container || true   
+            docker run -d --name lawoh-container -p 4000:3000 lawoh
