@@ -2,12 +2,13 @@ import { Module } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 import { MongooseModule } from '@nestjs/mongoose';
-import { Booking, BookingSchema, LearnPackage, LearnPackageSchema, Review, ReviewSchema, SubTypeLawyer, SubTypeLawyerSchema, TypeLawyer, TypeLawyerSchema, User, UserSchema, VipPackage, VipPackageSchema } from 'src/config/database.config';
+import { Booking, BookingSchema, Comment, CommentSchema, Conversation, ConversationSchema, LearnPackage, LearnPackageSchema, Message, MessageSchema, Review, ReviewSchema, SubTypeLawyer, SubTypeLawyerSchema, TypeLawyer, TypeLawyerSchema, User, UserSchema, Videos, VideoSchema, VipPackage, VipPackageSchema } from 'src/config/database.config';
 import { EmailModule } from 'src/email/email.module';
 import { ShareModule } from 'src/shared/sharedModule';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthModule } from 'src/auth/auth.module';
 import { KeyModule } from 'src/key/key.module';
+import { VideoModule } from 'src/video/video.module';
 
 @Module({
   // có dòng này mới import được vào mongo
@@ -20,7 +21,11 @@ import { KeyModule } from 'src/key/key.module';
       {name:TypeLawyer.name,schema: TypeLawyerSchema},
       {name:SubTypeLawyer.name,schema :SubTypeLawyerSchema},
       {name:Booking.name,schema:BookingSchema}, // cần import cái booking vô, người dùng cần render ra cái booking
-      {name:Review.name,schema:ReviewSchema} // người dùng cần render ra cái review
+      {name:Review.name,schema:ReviewSchema}, // người dùng cần render ra cái review
+      {name:Videos.name,schema:VideoSchema},
+      {name:Comment.name,schema:CommentSchema},
+      {name:Message.name,schema:MessageSchema},
+      {name:Conversation.name,schema:ConversationSchema}
     ]),
    EmailModule,ShareModule,AuthModule,JwtModule,KeyModule
   ], controllers: [UsersController],

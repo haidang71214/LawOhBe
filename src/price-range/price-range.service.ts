@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { UpdatePriceRangeDto } from './dto/update-price-range.dto';
-import { CustomPrice, MarketPriceRange, User } from 'src/config/database.config';
+import { Booking, CustomPrice, MarketPriceRange, Payment, User } from 'src/config/database.config';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { AuthService } from 'src/auth/auth.service';
@@ -16,7 +16,9 @@ export class PriceRangeService {
       private readonly authService : AuthService,
       @InjectModel(User.name) private UserModel: Model<User>,
     @InjectModel(MarketPriceRange.name) private MarketPriceRangeModel: Model<MarketPriceRange>,
-    @InjectModel(CustomPrice.name) private CustomPriceModel: Model<CustomPrice>
+    @InjectModel(CustomPrice.name) private CustomPriceModel: Model<CustomPrice>,
+    @InjectModel(Booking.name) private BookingModel: Model<Booking>,
+    @InjectModel(Payment.name) private PaymentModel: Model<Payment>
   ){}
 
 // hàm tạo giá cá nhân
@@ -100,31 +102,96 @@ const formattedMinPrice = checkPrice?.minPrice.toLocaleString('vi-VN');
     throw new Error(error)
   }
   }
-
-  async update(type: string, updatePriceRangeDto: UpdatePriceRangeDto,userId:string) {
+  async update(type: string, updatePriceRangeDto: UpdatePriceRangeDto, userId: string) {
     try {
+      // Kiểm tra quyền admin
       const checkUser = await this.UserModel.findById(userId);
-      if(checkUser?.role === 'admin'){
-      await this.MarketPriceRangeModel.findOneAndUpdate({
-        type:type
-      },{
-        minPrice:updatePriceRangeDto.minPrice,
-        maxPrice:updatePriceRangeDto.maxPrice,
-        description:updatePriceRangeDto.description
-      })
-      return{
-        status:200,
-        massage:"Update thành công"
+      if (!checkUser || checkUser.role !== 'admin') {
+        return {
+          status: 403,
+          message: 'Không đủ quyền truy cập',
+        };
       }
-      } 
-      return{
-        status:404,
-        massage:"Không đủ quyền"
+  
+      if (updatePriceRangeDto.maxPrice <= updatePriceRangeDto.minPrice) {
+        return {
+          status: 404,
+          message: 'Giá thấp nhất không được lớn hơn hoặc bằng giá cao nhất',
+        };
       }
+  
+      // Chuẩn hóa type
+      const normalizedType = type.trim().toUpperCase();
+      console.log(`Type được truyền vào: ${normalizedType}`);
+  
+      // Lấy tất cả các CustomPrice chỉ có type khớp với type đang update
+      const customPrices = await this.CustomPriceModel.find({ type: normalizedType });
+  
+      for (const item of customPrices) {
+        if (item.price > updatePriceRangeDto.maxPrice) {
+          // Cập nhật lại giá thành maxPrice
+          await this.CustomPriceModel.findByIdAndUpdate(item._id, {
+            price: updatePriceRangeDto.maxPrice,
+          });
+  
+          // Cập nhật thu nhập booking tương ứng
+          const bookings = await this.BookingModel.find({
+            lawyer_id: item.lawyer_id,
+            typeBooking: item.type,
+          });
+  
+          for (const booking of bookings) {
+            if (booking.booking_start && booking.booking_end) {
+              const days = (booking.booking_end.getTime() - booking.booking_start.getTime()) / (1000 * 60 * 60 * 24);
+              const income = (days * updatePriceRangeDto.maxPrice).toFixed(2);
+              await this.BookingModel.findByIdAndUpdate(booking._id, { income });
+            }
+          }
+        } else if (item.price < updatePriceRangeDto.minPrice) {
+          // Cập nhật lại giá thành minPrice
+          await this.CustomPriceModel.findByIdAndUpdate(item._id, {
+            price: updatePriceRangeDto.minPrice,
+          });
+  
+          // Cập nhật thu nhập booking tương ứng
+          const bookings = await this.BookingModel.find({
+            lawyer_id: item.lawyer_id,
+            typeBooking: item.type,
+          });
+  
+          for (const booking of bookings) {
+            if (booking.booking_start && booking.booking_end) {
+              const days = (booking.booking_end.getTime() - booking.booking_start.getTime()) / (1000 * 60 * 60 * 24);
+              const income = (days * updatePriceRangeDto.minPrice).toFixed(2);
+              await this.BookingModel.findByIdAndUpdate(booking._id, { income });
+            }
+          }
+        }
+      }
+  
+      // Cập nhật bảng MarketPriceRange
+      await this.MarketPriceRangeModel.findOneAndUpdate(
+        { type: normalizedType },
+        {
+          minPrice: updatePriceRangeDto.minPrice,
+          maxPrice: updatePriceRangeDto.maxPrice,
+          description: updatePriceRangeDto.description,
+        },
+        { new: true }
+      );
+  
+      return {
+        status: 200,
+        message: 'Cập nhật thành công',
+      };
     } catch (error) {
-      throw new Error(error)
+      return {
+        status: 500,
+        message: `Lỗi server: ${error.message}`,
+      };
     }
   }
+  
 
 async updateLawyerService(userId:string,body:updatePriceBylawyerDto){
  try {

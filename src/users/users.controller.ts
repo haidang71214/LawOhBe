@@ -23,17 +23,13 @@ export class UsersController {
 
   // tạo mới người dùng
     @Post()
-    @UseGuards(JwtAuthGuard)
-    @ApiBearerAuth()
     @ApiConsumes('multipart/form-data')
     @UseInterceptors(FileInterceptor('img'))
  async create(
     @Res() res:Response,
     @Body() body: CreateUserDto,
-    @Req() req,
     @UploadedFile() file: Express.Multer.File,
 ) {
-   const userId = req.user.userId;
     try {
       // lấy ảnh
       if(file){
@@ -45,7 +41,7 @@ export class UsersController {
         }
       }
       // với những cái như ri thì cần phải có 1 cái check admin
-      const response = await this.usersService.create(body,userId);
+      const response = await this.usersService.create(body);
       return res.status(response.status).json({message:response.message})
     } catch (error) {
       throw new Error(error)
@@ -57,12 +53,11 @@ export class UsersController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
  async  findAll(@Req() req,
- @Param('role') role:string,
    @Res() res:Response
 ) {
     const {userId} = req.user
     try {
-      const response =  await this.usersService.findAll(userId,role);
+      const response =  await this.usersService.findAll(userId);
       return res.status(response.status).json(response.data)
     } catch (error) {
       throw new Error(error)
@@ -86,40 +81,42 @@ export class UsersController {
 
 // updateUser với role là admin
 
-  @Patch('adminUpdateUser/:id')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiConsumes('multipart/form-data')
-  @UseInterceptors(FileInterceptor('img'))
-
-  async update(
+@Patch('adminUpdateUser/:id')
+@UseGuards(JwtAuthGuard)
+@ApiBearerAuth()
+@ApiConsumes('multipart/form-data')
+@UseInterceptors(FileInterceptor('img'))
+async update(
   @Param('id') id: string, 
   @Body() updateUserDto: UpdateUserDto,
-  @Res() res:Response,
+  @Res() res: Response,
   @Req() req,
   @UploadedFile() file: Express.Multer.File,
-  ) {
-    // lấy id
-    const userId = req.user.userId
-    // lấy cái secure_url của cái updateDto hiện tại xong xóa( trong trường hợp có ảnh )
-    // lấy ảnh của hiện tại
-      const currentUser = await this.user_model.findById(id);
-      if (!currentUser) {
-        return res.status(404).send({ message: 'User not found' });
-      }
-      if (file) {
-        const uploadResult = await this.cloudUploadService.uploadImage(
-          file,
-          'avatardd',
-        );
-      }
-    try {
-      const response = await this.usersService.updateTheoAdmin(id,updateUserDto,userId)
-      return res.status(response.status).json(response.message)
-    } catch (error) {
-      throw new Error(error)
-    }
+) {
+  const userId = req.user.userId;
+
+  const currentUser = await this.user_model.findById(id);
+  if (!currentUser) {
+    return res.status(404).send({ message: 'User not found' });
   }
+
+  try {
+    if (file) {
+      const uploadResult = await this.cloudUploadService.uploadImage(file, 'avatardd');
+      updateUserDto.avartar_url = uploadResult.secure_url;
+
+      // Nếu bạn muốn xóa ảnh cũ:
+      // if (currentUser.avartar_url) {
+      //   await this.cloudUploadService.deleteImage(currentUser.avartar_url);
+      // }
+    }
+
+    const response = await this.usersService.updateTheoAdmin(id, updateUserDto, userId);
+    return res.status(response.status).json(response.message);
+  } catch (error) {
+    return res.status(500).json({ message: error.message || 'Internal server error' });
+  }
+}
 
 
 
@@ -180,11 +177,6 @@ const userId = req.user.userId
 
 
   
-    // xóa người dùng
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(+id);
-  }
   @Get('/getListBookingUser/:id')
   async findShiet(
     @Param('id') id: string,
@@ -198,4 +190,5 @@ try {
   throw new Error(error)
 }
   }
+  
 }

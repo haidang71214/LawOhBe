@@ -1,8 +1,6 @@
 
 import { ApiHideProperty, ApiProperty } from "@nestjs/swagger";
-import { IsEmail, IsEnum, IsNotEmpty, IsOptional } from "class-validator";
-import { USER_ROLE } from "src/users/dto/create-user.dto";
-
+import { IsEmail, IsNotEmpty, IsOptional } from "class-validator";
 export class RegisterDto {
    @ApiProperty()
    @IsEmail({}, { message: 'không đúng định dạng' })

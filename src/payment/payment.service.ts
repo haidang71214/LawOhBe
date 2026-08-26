@@ -23,7 +23,8 @@ export class PaymentService {
     orderType: string,
     bankCode?: string,
     clientId?: string,
-    lawyerId?: string
+    lawyerId?: string,
+    bookingId?:string
   ): Promise<{ paymentUrl: string; txnRef: string }> {
     const tmnCode = process.env.VNP_TMN_CODE;
     const secretKey = process.env.VNP_HASH_SECRET;
@@ -75,6 +76,10 @@ export class PaymentService {
     console.log('vnp_SecureHash:', signed);
     console.log('Generated URL:', `${vnpUrl}?${qs.stringify(sortedParams, { encode: false })}`);
 
+    await this.PaymentModel.findOneAndUpdate({booking_id:bookingId},{
+      transaction_no:orderId
+    })
+    
     return { paymentUrl: `${vnpUrl}?${qs.stringify(sortedParams, { encode: false })}`, txnRef: orderId };
   }
 
@@ -131,6 +136,28 @@ export class PaymentService {
       }
     } catch (error) {
       throw new Error(error);
+    }
+  }
+  async getUserPayment(userId:string){
+    try {
+      console.log(userId);
+      const respone =  await this.PaymentModel.find({client_id:userId})
+      console.log(respone);
+      
+      return respone  
+    } catch (error) {
+      throw new Error(error)
+    }
+  }
+  async getPaymentSuccessOrFail(id:String) {
+    try {
+      const response = await this.PaymentModel.findById(id)
+      return {
+        status:200,
+        data:response
+      }
+    } catch (error) {
+      throw new Error(error)
     }
   }
 }

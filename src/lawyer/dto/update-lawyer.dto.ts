@@ -31,6 +31,5 @@ export class UpdateLawyerDto{
   experienceYear:number;
   @ApiProperty() // mô tả học vấn
   certificate: string[];
-  
 
 }

@@ -5,9 +5,23 @@ import { Document } from 'mongoose';
 import { Schema as MongooseSchema, Types } from 'mongoose'; // lấy từ mongoose
 
 export const databaseConfig: MongooseModuleOptions = {
-   uri: process.env.MONGODB_URI || 'mongodb://localhost:27017/LawOhBeLocal',
+   uri: process.env.MONGODB_URI ,
  };
-   
+export enum VideoLawCategory {
+  INSURANCE = 'INSURANCE',
+  CIVIL = 'CIVIL',
+  LAND = 'LAND',
+  CORPORATE = 'CORPORATE',
+  TRANSPORTATION = 'TRANSPORTATION',
+  ADMINISTRATIVE = 'ADMINISTRATIVE',
+  CRIMINAL = 'CRIMINAL',
+  FAMILY = 'FAMILY',
+  LABOR = 'LABOR',
+  INTELLECTUAL_PROPERTY = 'INTELLECTUAL_PROPERTY',
+  INHERITANCE = 'INHERITANCE',
+  TAX = 'TAX',
+}
+
 export enum ETypeLawyer {
   INSURANCE = 'INSURANCE',
   CIVIL = 'CIVIL',
@@ -279,6 +293,9 @@ export class Payment extends Document {
   client_id: Types.ObjectId;
 @Prop({ type: Types.ObjectId, ref: 'User' }) 
 lawyer_id: Types.ObjectId;
+// thêm cái booking vào đây
+@Prop({type:Types.ObjectId,ref:"Booking"})
+booking_id:Types.ObjectId;
 }
 
 @Schema({ timestamps: true, collection: 'lawyer_payments' })
@@ -293,14 +310,83 @@ export class LawyerPayment extends Document {
   @Prop() payment_date: Date;
   @Prop() payment_method: string;
 }
+@Schema({timestamps:true,collection:'forms'})
+export class Form extends Document{
+  @Prop()
+  uri_secure:string
+  @Prop()
+  mainContent:string
+  @Prop()
+  description:string
+  @Prop({enum:ETypeLawyer})
+  type:ETypeLawyer
+}
+// tạo phòng nhắn tin, có thể là 1 1 hoặc nhiều 1
+@Schema({ timestamps: true, collection: 'conversations' })
+export class Conversation extends Document {
+  @Prop({ type: [Types.ObjectId], ref: 'User', required: true })
+  participants: Types.ObjectId[];
+}
+// tạo người nhắn, nhắn tới nhóm nào ? những ai là người đọc? 
+@Schema({ timestamps: true, collection: 'messages' })
+export class Message extends Document {
+  @Prop({ type: Types.ObjectId, ref: 'Conversation', required: true })
+  conversation: Types.ObjectId;
 
+  // ai gửi ?
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
+  sender: Types.ObjectId;
+
+  @Prop({ required: true })
+  content: string;
+  @Prop({ type: [Types.ObjectId], ref: 'User', default: [] })
+  readBy: Types.ObjectId[];
+}
+// làm cái video
+@Schema({ timestamps: true, collection: 'Videos' })
+export class Videos extends Document{
+  @Prop({ 
+    type: String, 
+    enum: Object.values(VideoLawCategory), 
+  })
+  categories: string;
+  // người đăng
+  @Prop({type:Types.ObjectId,ref:'User'})
+  user_id: Types.ObjectId;
+  @Prop()
+  // video_url
+  video_url:string;
+  @Prop()
+  thumnail_url:string;
+  
+  @Prop({ default:0,max:5,min:0 })
+  star:number;
+  @Prop()
+  description:string
+  @Prop({required:true,default:false})
+  accept:boolean
+}
+@Schema({ timestamps: true, collection:'Comments' })
+export class Comment extends Document {
+  @Prop({ type: Types.ObjectId, ref: 'Videos', required: true })
+  video_id: Types.ObjectId;
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
+  user_id: Types.ObjectId;
+  @Prop({ type: String, required: true })
+  content: string;
+  @Prop({ type: Types.ObjectId, ref: 'Comment', default: null })
+  parent_comment_id: Types.ObjectId | null;
+}
+// làm cái news
+
+export const CommentSchema = SchemaFactory.createForClass(Comment);
+export const VideoSchema = SchemaFactory.createForClass(Videos);
+export const MessageSchema = SchemaFactory.createForClass(Message);
+export const ConversationSchema = SchemaFactory.createForClass(Conversation);
+export const FormSchema = SchemaFactory.createForClass(Form)
 export const PaymentSchema = SchemaFactory.createForClass(Payment);
- // tạo cái payment cho admin
-// tạo thêm 1 cái payment cho luật sư để quản lí nhận tiền
 export const LawyerPaymentSchema = SchemaFactory.createForClass(LawyerPayment) // 
-
 export const CustomPriceSchema = SchemaFactory.createForClass(CustomPrice);
-// tạo schema
 export const MarketPriceRangeSchema = SchemaFactory.createForClass(MarketPriceRange);
 export const UserSchema = SchemaFactory.createForClass(User);
 export const VipPackageSchema = SchemaFactory.createForClass(VipPackage);

@@ -74,10 +74,8 @@ try {
 try {
   const userId = req.user.userId
   const response = await  this.priceRangeService.update(type, updatePriceRangeDto,userId);
-  return res.status(response.status).json(response.massage)
+  return res.status(200).json({message:"Update thành công"})
 } catch (error) {
   throw new Error(error)
-}
-   
-  }
+}}
 }

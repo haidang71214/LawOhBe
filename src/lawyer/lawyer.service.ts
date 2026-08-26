@@ -1,13 +1,14 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { CloudUploadService } from 'src/shared/cloudUpload.service';
 import { EmailService } from 'src/email/email.service';
 import { AuthService } from 'src/auth/auth.service';
 import { Booking, CustomPrice, MarketPriceRange, Review, SubTypeLawyer, TypeLawyer, User, VipPackage } from 'src/config/database.config';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { CreateVipPackageDto } from '../vip-package/dto/create-vippackage.dto';
 import { UpdateLawyerDto } from './dto/update-lawyer.dto';
 import { FilterLawyerDto } from './dto/filterLawyer.dto';
+import { CreateLawyerDto } from './dto/create-lawyer.dto';
 
 @Injectable()
 export class LawyerService {
@@ -51,6 +52,7 @@ constructor(
   async update(updateLawyerDto:UpdateLawyerDto,userId:string) {
     try {
       const thisLawyer = await this.UserModel.findById(userId);
+// check userId có phải là luật sư hay hoặc admin, nếu admin thì phải nhập thêm cái lawyerId
       if(thisLawyer?.role === 'lawyer'){
         // bước 1. lấy cái tye_lawyer mới ở đây, bước 2// so sánh với cái type_lawyer cũ, nếu không có thì
         // tâp trung vào cái này hơn nếu có thì thay thế, đồng thời phải xóa cái giá mình bỏ vào với cái type từ trước
@@ -166,6 +168,109 @@ if (thisLawyer.typeLawyer === null || thisLawyer.typeLawyer === undefined ) {
       throw new Error(error)
     }
   }
+  async updateLawyer(createLawyerDto: CreateLawyerDto, userId: any, id: string) {
+    try {
+      // Kiểm tra quyền admin
+      const checkAdmin = await this.authService.checkAdmin(userId);
+      if (!checkAdmin) {
+        throw new UnauthorizedException('Không phải admin');
+      }
+
+      // Cập nhật role thành 'lawyer' cho user
+      await this.UserModel.findByIdAndUpdate(id, { role: 'lawyer' });
+      const lawyer = await this.UserModel.findById(id).lean(); // Sử dụng .lean() để lấy dữ liệu thô
+
+      if (!lawyer) {
+        throw new BadRequestException('Không tìm thấy luật sư');
+      }
+
+      // Điền dữ liệu mặc định nếu không có
+      const {
+        description = 'Mô tả mặc định',
+        type_lawyer = 'INSURANCE',
+        sub_type_lawyers = ['Pháp lý cơ bản'],
+        experienceYear = 0,
+        certificate = 'Chứng chỉ mặc định',
+      } = createLawyerDto;
+
+      let typeLawyerId: Types.ObjectId;
+
+      if (!lawyer.typeLawyer) {
+        // Tạo mới TypeLawyer nếu chưa có
+        const newTypeLawyer = await this.TypeLawyerModel.create({
+          type: type_lawyer,
+          lawyer_id: id,
+        });
+        typeLawyerId = newTypeLawyer._id as Types.ObjectId ; // _id là ObjectId
+
+        // Tạo SubTypeLawyer mới
+        await this.SubTypeLawyerModel.create({
+          parentType: typeLawyerId,
+          subType: sub_type_lawyers,
+        });
+      } else {
+        // Cập nhật TypeLawyer hiện tại
+        typeLawyerId = lawyer.typeLawyer as Types.ObjectId; // Type assertion để đảm bảo là ObjectId
+        await this.TypeLawyerModel.findByIdAndUpdate(typeLawyerId, {
+          type: type_lawyer,
+          lawyer_id: id,
+        });
+
+        // Cập nhật SubTypeLawyer
+        await this.SubTypeLawyerModel.updateOne(
+          { parentType: typeLawyerId },
+          { subType: sub_type_lawyers },
+          { upsert: true },
+        );
+      }
+
+      // Cập nhật thông tin luật sư
+      await this.UserModel.findByIdAndUpdate(id, {
+        description,
+        typeLawyer: typeLawyerId, // Lưu ObjectId
+        certificate,
+        experienceYear,
+      });
+
+      // Xử lý CustomeerPriceModel
+      const existingCustomPrices = await this.CustomeerPriceModel.find({ lawyer_id: id }).lean();
+      const existingTypes = existingCustomPrices.map((cp) => cp.type);
+
+      await Promise.all(
+        (sub_type_lawyers || []).map(async (type) => {
+          const existingPrice = existingCustomPrices.find((cp) => cp.type === type);
+
+          if (existingPrice) {
+            await this.CustomeerPriceModel.updateOne(
+              { lawyer_id: id, type },
+              { $set: { price: existingPrice.price } },
+            );
+          } else {
+            await this.CustomeerPriceModel.updateOne(
+              { lawyer_id: id, type },
+              {
+                lawyer_id: id,
+                type,
+                price: 0,
+                description: 'Mặc định',
+              },
+              { upsert: true },
+            );
+          }
+        }),
+      );
+
+      return {
+        status: 200,
+        message: `Luật sư với ID ${id} đã được cập nhật thành công`,
+      };
+    } catch (error) {
+      if (error instanceof BadRequestException || error instanceof UnauthorizedException) {
+        throw error;
+      }
+      throw new BadRequestException(`Lỗi khi cập nhật luật sư: ${error.message}`);
+    }
+  }
   
 // xóa luật sư ? 
   remove(id: number) {
@@ -179,16 +284,16 @@ async filterLawyers(filterDto: FilterLawyerDto): Promise<{ data: any[], total: n
 
   // Lọc theo số sao (nếu có)
   if (stars !== undefined) {
-    query.start = stars;
-}
-
+    query.star = stars; // Corrected 'start' to 'star'
+  }
+  console.log(filterDto);
+  
   // Lọc theo loại luật sư
   if (typeLawyer) {
     const typeLawyers = await this.TypeLawyerModel
       .find({ type: { $regex: typeLawyer, $options: 'i' } })
       .select('lawyer_id')
       .exec();
-    // nó đang tìm với lawyer_id
     const lawyerIds = typeLawyers.map((type) => type.lawyer_id);
 
     if (lawyerIds.length > 0) {
@@ -206,11 +311,12 @@ async filterLawyers(filterDto: FilterLawyerDto): Promise<{ data: any[], total: n
   // Tính toán phân trang
   const skip = (page - 1) * limit;
   
-  // Truy vấn dữ liệu với phân trang
+  // Truy vấn dữ liệu với phân trang và sắp xếp theo số sao (star) giảm dần
   const [data, total] = await Promise.all([
     this.UserModel
       .find(query)
       .populate('typeLawyer')
+      .sort({ star: -1 }) // Sắp xếp theo star giảm dần (cao nhất lên đầu, 0 ở cuối)
       .skip(skip)
       .limit(limit)
       .exec(),

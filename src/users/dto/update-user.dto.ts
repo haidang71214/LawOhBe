@@ -4,11 +4,8 @@ import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsEnum, IsNotEmpty, IsOptional } from 'class-validator';
 
 export class UpdateUserDto {
-    // không update mail
-
    
       @ApiProperty()
-      @IsNotEmpty()
       password: string;
    
       @ApiProperty()

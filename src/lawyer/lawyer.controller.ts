@@ -6,6 +6,7 @@ import { Response } from 'express';
 import { CreateVipPackageDto } from '../vip-package/dto/create-vippackage.dto';
 import { UpdateLawyerDto } from './dto/update-lawyer.dto';
 import { FilterLawyerDto } from './dto/filterLawyer.dto';
+import { CreateLawyerDto } from './dto/create-lawyer.dto';
 
 @Controller('/lawyer')
 export class LawyerController {
@@ -39,6 +40,24 @@ export class LawyerController {
   const userId = req.user.userId
     try {
       const results = await this.lawyerService.update(updateLawyerDto,userId)
+      res.status(results.status).json(results.message)
+    } catch (error) {
+      throw new Error(error)
+    }
+  }
+// làm thêm 1 cái là admin thay đổi
+  @Patch('/adminCreatelawyer/:id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  async updateLawyer(@Body() createLawyerDto: CreateLawyerDto,
+  @Param('id') id:string,
+  @Res() res:Response,
+  @Req() req
+) {
+  // update giới thiệu, update chuyên ngành với update chuyên ngành chi tiết
+  const userId = req.user.userId
+    try {
+      const results = await this.lawyerService.updateLawyer(createLawyerDto,userId,id)
       res.status(results.status).json(results.message)
     } catch (error) {
       throw new Error(error)

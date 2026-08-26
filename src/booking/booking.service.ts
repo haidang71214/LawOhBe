@@ -111,7 +111,9 @@ export class BookingService {
       if(check){
         //'none','accept','reject'
         // ủa lỡ nó update 1 cái type là ăn cứt ??, lấy thêm điều kiện là
-       const bookingData =  await this.BookingModel.findOneAndUpdate({client_id,lawyer_id:lawyerid},{
+       const bookingData =  await this.BookingModel.findOneAndUpdate({client_id,lawyer_id:lawyerid,
+        _id:booking_id
+       },{
           status:"accept"   
         })
  // cái lồn này accept cái là mấy cái khác xóa,check thêm 1 điều kiện về type nữa
@@ -141,21 +143,6 @@ export class BookingService {
 // lôi cái booking ra 
 
 
- const bookingShiet = await this.BookingModel.findOne({
-  client_id,
-  lawyer_id:lawyerid,
-  _id: new Types.ObjectId(booking_id) // ép kiểu về obj
- })
-// tạo mới 1 cái payment cho client và admin
-      const orderId = uuidv4();
-      await this.PaymentModel.create({
-        transaction_no: orderId,
-        amount:bookingShiet?.income,
-        payment_method: 'VNPAY',
-        status: 'pending',
-        client_id: new Types.ObjectId(client_id),
-        lawyer_id: new Types.ObjectId(lawyerid),
-      });
       } 
 
       return{
