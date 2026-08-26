@@ -5,7 +5,7 @@ import { Document } from 'mongoose';
 import { Schema as MongooseSchema, Types } from 'mongoose'; // lấy từ mongoose
 
 export const databaseConfig: MongooseModuleOptions = {
-   uri: process.env.MONGODB_URI ,
+   uri: process.env.MONGODB_URI,
  };
 export enum VideoLawCategory {
   INSURANCE = 'INSURANCE',
@@ -342,6 +342,8 @@ export class Message extends Document {
   @Prop({ type: [Types.ObjectId], ref: 'User', default: [] })
   readBy: Types.ObjectId[];
 }
+
+
 // làm cái video
 @Schema({ timestamps: true, collection: 'Videos' })
 export class Videos extends Document{

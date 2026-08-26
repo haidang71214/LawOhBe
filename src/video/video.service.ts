@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateVideoDto } from './dto/create-video.dto';
 import { UpdateVideoDto } from './dto/update-video.dto';
 import { Comment, User, Videos } from 'src/config/database.config';
@@ -8,6 +8,7 @@ import { CloudUploadService } from 'src/shared/cloudUpload.service';
 import { AcceptRejectAction, AcceptRejectDto } from './dto/acceptRejectBody';
 import { EmailService } from 'src/email/email.service';
 import { AuthService } from 'src/auth/auth.service';
+import { RtcRole, RtcTokenBuilder } from 'agora-access-token';
 
 @Injectable()
 export class VideoService {
@@ -221,6 +222,5 @@ export class VideoService {
       throw new Error(error)
     }
   }
-// comment bài viết, này chắc để realtime
-  
+
 }

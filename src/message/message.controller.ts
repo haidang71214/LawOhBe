@@ -31,6 +31,8 @@ async createConversation(@Body() createConversationDto: CreateConversationDto) {
   ) {
     return this.chatService.addMessage(conversationId, senderId, content);
   }
+
+  
 // api lấy đoạn hội thoại
   @Get('messages/:conversationId')
   async getMessages(@Param('conversationId') conversationId: string) {

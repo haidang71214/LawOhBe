@@ -21,6 +21,7 @@ async function bootstrap() {
     app.enableCors({
       //  deploy fe, thay đổi những thứ có ở cái localhost
       // gán cái fe vào đây
+      // ,'http://localhost:3000'
       origin: [process.env.NODE_ENV === 'production' ? `${URL_PRODUCTION}` : '*','http://localhost:3000'],
       methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
       credentials: true,
@@ -42,11 +43,11 @@ async function bootstrap() {
 
     // Khởi tạo và setup Socket.io
     const chatService = app.get(ChatService);
-    const commentService = app.get(CommentService);
-    setupSocketIo(app, chatService, commentService);
+    setupSocketIo(app, chatService);
 
     // Khởi động ứng dụng trên 0.0.0.0 kệ mẹ cái env vì env đéo chạy được
-    const port = process.env.PORT || 10000; // Mặc định 10000 theo tài liệu Render
+    //process.env.PORT ||
+    const port =  10000; // Mặc định 10000 theo tài liệu Render
 await app.listen(port, '0.0.0.0');
 console.log(`Ứng dụng đang chạy trên port: http://0.0.0.0:${port}`);
   } catch (error) {
