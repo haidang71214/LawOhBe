@@ -34,6 +34,4 @@ export class UpdateUserDto {
       @ApiProperty()
       province:string;// tỉnh thành của thằng user
    
-      @ApiProperty()
-      warn:string;//warns của thằng user
 }

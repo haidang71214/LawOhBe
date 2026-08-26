@@ -29,23 +29,40 @@ export class PriceRangeService {
       const checkPrice = await this.MarketPriceRangeModel.findOne({
         type:Type
       });
-
-    if (checkPrice && price >= checkPrice.minPrice && price <= checkPrice.maxPrice) {
+// check cái customprice đã tồn tại chưa, nếu có 1 cái customprice tương tự thì thay thế nó
+    if (checkPrice && price >= checkPrice.minPrice && price <= checkPrice.maxPrice){
+      const checkGiaTonTai = await this.CustomPriceModel.findOne({lawyer_id:userId,type:Type})
+      if(checkGiaTonTai){
+        // nếu tồn tại thì thay đổi
+          await this.CustomPriceModel.replaceOne({_id:checkGiaTonTai._id},{
+            lawyer_id: userId,
+            type: Type,
+            price,
+            description
+          }    
+          )
+          return {
+            status: 200,
+            message: 'Setup giá thành công'
+          };
+      }
   await this.CustomPriceModel.create({
-    lawyer_id: userId,
-    type: Type,
-    price,
-    description
+       lawyer_id: userId,
+       type: Type,
+       price,
+       description
   });
-
+// cần phải có 1 cái check là đã cập nhật chưa, nếu cập nhật rồi thì update, chứ không tạo mới
   return {
     status: 200,
     message: 'Setup giá thành công'
   };
 }
+const formattedMinPrice = checkPrice?.minPrice.toLocaleString('vi-VN');
+      const formattedMaxPrice = checkPrice?.maxPrice.toLocaleString('vi-VN');
   return{
     status:404,
-    message:`Giá phải trong khoảng của ${checkPrice?.minPrice} tới ${checkPrice?.maxPrice}`
+    message:`Giá phải trong khoảng của ${formattedMinPrice} VND tới ${formattedMaxPrice} VND`
   }
 
       }
@@ -121,8 +138,10 @@ async updateLawyerService(userId:string,body:updatePriceBylawyerDto){
 
     if (checkPrice && price >= checkPrice.minPrice && price <= checkPrice.maxPrice) {
   await this.CustomPriceModel.findOneAndUpdate({
-    type:Type
+    type:Type,
+    lawyer_id:checkLaywer._id
   },{
+    type:Type,
     lawyer_id:userId,
     price,
     description
@@ -133,9 +152,11 @@ async updateLawyerService(userId:string,body:updatePriceBylawyerDto){
     message: 'Setup giá thành công'
   };
 }
+const formattedMinPrice = checkPrice?.minPrice.toLocaleString('vi-VN');
+  const formattedMaxPrice = checkPrice?.maxPrice.toLocaleString('vi-VN');
   return{
     status:404,
-    message:`Giá phải trong khoảng của ${checkPrice?.minPrice} tới ${checkPrice?.maxPrice}`
+    message:`Giá phải trong khoảng của ${formattedMinPrice} tới ${formattedMaxPrice}`
   }
       }
       return {

@@ -1,10 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Res, HttpStatus, UseInterceptors, UploadedFile, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Res, HttpStatus, UseInterceptors, UploadedFile, Req, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 
 import { Response } from 'express';
 import { loginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
-import { ApiConsumes, ApiResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiConsumes, ApiResponse } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CloudUploadService } from 'src/shared/cloudUpload.service';
 import { SendToken } from './dto/sendTokenReset.dto';
@@ -15,6 +15,7 @@ import { Model } from 'mongoose';
 import { User } from 'src/config/database.config';
 import { CustomRequest } from './custom-request';
 import { InjectModel } from '@nestjs/mongoose'; // ý là vẫn chưa biết cái này lắm
+import { JwtAuthGuard } from './stratergy/jwt.guard';
 
 //  Promise<Response<string>> 
 
@@ -72,7 +73,7 @@ private readonly TokenHeheControllerService: TokenControllerService
 }
 
 // check reset code với thay pass
-  @Post('/ChagePassWord')
+  @Post('/ChagePassword')
   @ApiResponse({ status: 200, description: 'Password updated successfully.' })
   async changePass(
     @Body()body:changePass,
@@ -135,4 +136,21 @@ private readonly TokenHeheControllerService: TokenControllerService
     }
   }
 
+  
+
+@Get('getMySelf')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
+async fuckingGetDetailSelf(
+  @Req() req,
+  @Res() res:Response
+){
+const {userId} = req.user
+try {
+  const response  = await this.userModel.findById(userId);
+  return res.status(200).json(response)
+} catch (error) {
+  throw new Error(error);
+}
+}
 }

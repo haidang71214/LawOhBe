@@ -29,13 +29,6 @@ export class RegisterDto {
    age: number;
 
    @ApiProperty()
-   @IsEnum(USER_ROLE)
-   role: USER_ROLE; // quy định cái này thuộc kiểu enum khi mới đăng kí thì có role luôn hả ?
-
-
-   @ApiProperty()
    province:string;// tỉnh thành của thằng user
 
-   @ApiProperty()
-   warn:string;//warns của thằng user
 }

@@ -26,4 +26,11 @@ export class UpdateLawyerDto{
     description: 'Danh sách các loại luật sư con (VD: bảo hiểm nhân thọ, bảo hiểm thất nghiệp...)'
   })
   sub_type_lawyers: string[];
+
+  @ApiProperty() // mô tả năm kinh nghiệm
+  experienceYear:number;
+  @ApiProperty() // mô tả học vấn
+  certificate: string[];
+  
+
 }
