@@ -18,7 +18,7 @@ import { MessageModule } from './message/message.module';
 import { ClassificationModule } from './classification/classification.module';
 import { VideoModule } from './video/video.module';
 import { CommentModule } from './comment/comment.module';
-import { StringGeesetupModule } from './string-geesetup/string-geesetup.module';
+import { NewsModule } from './news/news.module';
 
 @Module({
   imports: [
@@ -29,7 +29,7 @@ import { StringGeesetupModule } from './string-geesetup/string-geesetup.module';
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
-        uri: configService.get<string>('MONGODB_URI') || configService.get<string>('MONGODB_URL'),
+        uri:configService.get<string>('MONGODB_URI') ||configService.get<string>('MONGODB_URL'),
       }),
       inject: [ConfigService],
     }),
@@ -49,7 +49,7 @@ import { StringGeesetupModule } from './string-geesetup/string-geesetup.module';
     ClassificationModule,
     VideoModule,
     CommentModule,
-    StringGeesetupModule,
+    NewsModule,
     
   ],
 

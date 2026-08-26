@@ -7,7 +7,6 @@ import { JwtAuthGuard } from 'src/auth/stratergy/jwt.guard';
 import { Payment } from 'src/config/database.config';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
-import { AuthGuard } from '@nestjs/passport';
 import { URL_PRODUCTION } from 'src/main';
 
 @Controller('payment')
@@ -22,8 +21,6 @@ export class PaymentController {
     try {
       const { amount, orderInfo, orderType, bankCode, clientId, lawyerId,bookingId } = createPaymentDto;
       const { paymentUrl, txnRef } = await this.paymentService.createPaymentUrl(amount, orderInfo, orderType, bankCode, clientId, lawyerId,bookingId);
-      console.log(clientId, lawyerId);
-  // thêm bookingId trong mayment 
       const existingSuccessPayment = await this.PaymentModel.findOne({ client_id: clientId, lawyer_id: lawyerId,booking_id:bookingId, status: 'success' });
       if (existingSuccessPayment) {
         throw new BadRequestException('Đã có giao dịch thành công cho client và lawyer này.');

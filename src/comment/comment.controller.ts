@@ -1,7 +1,6 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, Res } from '@nestjs/common';
+import { Controller, Post, Body, Param, Delete, UseGuards, Req, Res } from '@nestjs/common';
 import { CommentService } from './comment.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
-import { UpdateCommentDto } from './dto/update-comment.dto';
 import { JwtAuthGuard } from 'src/auth/stratergy/jwt.guard';
 import { ApiBearerAuth } from '@nestjs/swagger';
 

@@ -5,7 +5,7 @@ import { Document } from 'mongoose';
 import { Schema as MongooseSchema, Types } from 'mongoose'; // lấy từ mongoose
 
 export const databaseConfig: MongooseModuleOptions = {
-   uri: process.env.MONGODB_URI ,
+   uri: process.env.MONGODB_URI,
  };
 export enum VideoLawCategory {
   INSURANCE = 'INSURANCE',
@@ -380,7 +380,24 @@ export class Comment extends Document {
   parent_comment_id: Types.ObjectId | null;
 }
 // làm cái news
+@Schema({timestamps:true,collection:'News'})
+export class New extends Document{
+  @Prop({enum:ETypeLawyer})
+  type:ETypeLawyer
+  @Prop()
+  mainTitle:string
+  @Prop()
+  content:string;
+  @Prop({default:false})
+  isAccept:boolean;
+  // mảng ảnh
+  @Prop()
+  image_url:string[];
+  @Prop({type: Types.ObjectId, ref:'User' })
+  userId:Types.ObjectId
+}
 
+export const NewSchema = SchemaFactory.createForClass(New);
 export const CommentSchema = SchemaFactory.createForClass(Comment);
 export const VideoSchema = SchemaFactory.createForClass(Videos);
 export const MessageSchema = SchemaFactory.createForClass(Message);

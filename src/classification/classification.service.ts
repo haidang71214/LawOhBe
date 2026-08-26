@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { GoogleGenerativeAI, GenerativeModel, GenerateContentResult } from '@google/generative-ai';
-import { ClassificationRequestDto, ClassificationResponseDto } from './classification.dto';
+import { ClassificationRequestDto } from './classification.dto';
 import { TypeLawyer, User, ETypeLawyer } from 'src/config/database.config';
 
 @Injectable()

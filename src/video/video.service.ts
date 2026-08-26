@@ -1,14 +1,11 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CreateVideoDto } from './dto/create-video.dto';
-import { UpdateVideoDto } from './dto/update-video.dto';
 import { Comment, User, Videos } from 'src/config/database.config';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { CloudUploadService } from 'src/shared/cloudUpload.service';
 import { AcceptRejectAction, AcceptRejectDto } from './dto/acceptRejectBody';
 import { EmailService } from 'src/email/email.service';
 import { AuthService } from 'src/auth/auth.service';
-import { RtcRole, RtcTokenBuilder } from 'agora-access-token';
 
 @Injectable()
 export class VideoService {
@@ -16,7 +13,6 @@ export class VideoService {
     @InjectModel(Videos.name) private VideosModel: Model<Videos>,
     @InjectModel(Comment.name) private CommentModel: Model<Comment>,
     @InjectModel(User.name) private UserModel: Model<User>,
-    private readonly cloudUploadService:CloudUploadService,
     private readonly emailService:EmailService,
     private readonly authService : AuthService
   ){}
@@ -189,8 +185,6 @@ export class VideoService {
   }
   async getPrivateVideo(userId: string) {
     try {
-
-      // Lấy danh sách video của user
       const videos = await this.VideosModel.find({ user_id: userId }).exec();
       if (!videos || videos.length === 0) {
         return {
@@ -212,7 +206,6 @@ export class VideoService {
  async remove(id: string,userId:String) {
     try {
 // =)))))) khỏi check
-
       await this.VideosModel.findByIdAndDelete(id)
       
       return{

@@ -3,22 +3,15 @@ import { UpdatePriceRangeDto } from './dto/update-price-range.dto';
 import { Booking, CustomPrice, MarketPriceRange, Payment, User } from 'src/config/database.config';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { AuthService } from 'src/auth/auth.service';
-import { EmailService } from 'src/email/email.service';
-import { CloudUploadService } from 'src/shared/cloudUpload.service';
 import { CustomPriceRangeDto } from './dto/create-price-range.dto';
 import { updatePriceBylawyerDto } from './dto/update-byLawyerDto';
 @Injectable()
 export class PriceRangeService {
   constructor(
-      private readonly cloudUploadService : CloudUploadService,
-      private readonly mailService : EmailService,
-      private readonly authService : AuthService,
       @InjectModel(User.name) private UserModel: Model<User>,
     @InjectModel(MarketPriceRange.name) private MarketPriceRangeModel: Model<MarketPriceRange>,
     @InjectModel(CustomPrice.name) private CustomPriceModel: Model<CustomPrice>,
     @InjectModel(Booking.name) private BookingModel: Model<Booking>,
-    @InjectModel(Payment.name) private PaymentModel: Model<Payment>
   ){}
 
 // hàm tạo giá cá nhân
@@ -89,8 +82,6 @@ const formattedMinPrice = checkPrice?.minPrice.toLocaleString('vi-VN');
     throw new Error(error)
    }
   }
-
-// hiện chi tiết của cái Etype
   async findOne(id:string) {
   try {
     const response = await this.MarketPriceRangeModel.findOne({type:id})
@@ -119,22 +110,15 @@ const formattedMinPrice = checkPrice?.minPrice.toLocaleString('vi-VN');
           message: 'Giá thấp nhất không được lớn hơn hoặc bằng giá cao nhất',
         };
       }
-  
-      // Chuẩn hóa type
       const normalizedType = type.trim().toUpperCase();
       console.log(`Type được truyền vào: ${normalizedType}`);
-  
-      // Lấy tất cả các CustomPrice chỉ có type khớp với type đang update
       const customPrices = await this.CustomPriceModel.find({ type: normalizedType });
   
       for (const item of customPrices) {
         if (item.price > updatePriceRangeDto.maxPrice) {
-          // Cập nhật lại giá thành maxPrice
           await this.CustomPriceModel.findByIdAndUpdate(item._id, {
             price: updatePriceRangeDto.maxPrice,
           });
-  
-          // Cập nhật thu nhập booking tương ứng
           const bookings = await this.BookingModel.find({
             lawyer_id: item.lawyer_id,
             typeBooking: item.type,

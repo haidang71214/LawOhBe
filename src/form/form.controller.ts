@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Res, UseInterceptors, UploadedFile, UseGuards, Req, NotFoundException, Query, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Res, UseInterceptors, UploadedFile, UseGuards, Req, NotFoundException, Query, HttpStatus } from '@nestjs/common';
 import { FormService } from './form.service';
 import { CreateFormDto } from './dto/create-form.dto';
 import { Response } from 'express';
@@ -6,8 +6,6 @@ import { ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from 'src/auth/stratergy/jwt.guard';
 import { StorageService } from 'src/storage/storage.service';
-import * as fs from 'fs/promises';
-import { resolve } from 'path';
 import { FindAllFormDto } from './dto/findAllForm.dto';
 import { Form } from 'src/config/database.config';
 import { InjectModel } from '@nestjs/mongoose';

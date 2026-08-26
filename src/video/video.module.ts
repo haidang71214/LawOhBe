@@ -8,7 +8,6 @@ import { JwtModule } from '@nestjs/jwt';
 import { KeyModule } from 'src/key/key.module';
 import { EmailModule } from 'src/email/email.module';
 import { AuthModule } from 'src/auth/auth.module';
-import { CommentModule } from 'src/comment/comment.module';
 
 @Module({
   imports:[

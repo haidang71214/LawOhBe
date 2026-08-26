@@ -5,7 +5,6 @@ import { AuthService } from 'src/auth/auth.service';
 import { Booking, CustomPrice, MarketPriceRange, Review, SubTypeLawyer, TypeLawyer, User, VipPackage } from 'src/config/database.config';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { CreateVipPackageDto } from '../vip-package/dto/create-vippackage.dto';
 import { UpdateLawyerDto } from './dto/update-lawyer.dto';
 import { FilterLawyerDto } from './dto/filterLawyer.dto';
 import { CreateLawyerDto } from './dto/create-lawyer.dto';
@@ -14,17 +13,11 @@ import { CreateLawyerDto } from './dto/create-lawyer.dto';
 export class LawyerService {
 // import chỗ schema kia vô
 constructor(
-  private readonly cloudUploadService : CloudUploadService,
-  private readonly mailService : EmailService,
   private readonly authService : AuthService,
   @InjectModel(User.name) private readonly UserModel: Model<User>,
-  @InjectModel(Review.name) private ReviewModal: Model<Review>,
   @InjectModel(TypeLawyer.name) private TypeLawyerModel: Model<TypeLawyer>,
   @InjectModel(SubTypeLawyer.name) private SubTypeLawyerModel: Model<SubTypeLawyer>,
-  @InjectModel(VipPackage.name) private VipPackageModel: Model<VipPackage>,
-  @InjectModel(Booking.name) private BookingModel: Model<Booking>,
-  @InjectModel(MarketPriceRange.name) private MarketPriceRangeModel: Model<MarketPriceRange>,
-  @InjectModel(CustomPrice.name) private CustomeerPriceModel: Model<CustomPrice>
+ @InjectModel(CustomPrice.name) private CustomeerPriceModel: Model<CustomPrice>
 ){}
 // giờ mình sẽ làm thao tác với luật sư trước xong tới thao tác với người dùng
 // luật sư sẽ có : thêm các gói

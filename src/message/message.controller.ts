@@ -3,7 +3,6 @@ import { ChatService } from './message.service';
 import { CreateConversationDto } from './dto/update-message.dto';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/stratergy/jwt.guard';
-import { AuthGuard } from '@nestjs/passport';
 import { Response } from 'express';
 
 

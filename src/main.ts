@@ -5,14 +5,18 @@ import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { setupSocketIo } from './config/socket-io';
 import { ChatService } from './message/message.service';
-import { CommentService } from './comment/comment.service';
-
+import { PeerServer } from 'peer';
 
 export const URL_PRODUCTION = 'https://lawohfe.onrender.com'
 async function bootstrap() {
   try {
     const app = await NestFactory.create(AppModule);
     const configService = app.get(ConfigService);
+    const peerServer = PeerServer({
+      path: "/peerjs"
+    });
+    const expressApp = app.getHttpAdapter().getInstance(); // ✅ Lấy instance của Express
+expressApp.use('/peerjs', peerServer); // ✅ Mount PeerServer tại /peerjs
 
     // Cấu hình global pipes
     app.useGlobalPipes(new ValidationPipe());

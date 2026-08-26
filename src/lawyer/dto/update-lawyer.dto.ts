@@ -1,6 +1,5 @@
-import { ApiProperty, PartialType } from '@nestjs/swagger';
-import { IsArray, IsEmail, IsEnum, IsMongoId } from 'class-validator';
-import { Types } from 'mongoose';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsArray } from 'class-validator';
 import { ETypeLawyer } from 'src/config/database.config';
 
 export class UpdateLawyerDto{

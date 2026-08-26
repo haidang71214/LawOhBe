@@ -1,9 +1,8 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Req, Res, UseGuards } from '@nestjs/common';
 import { BookingService } from './booking.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
-import { UpdateBookingDto } from './dto/update-booking.dto';
 import { Response } from 'express';
-import { ApiBadGatewayResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {  ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/stratergy/jwt.guard';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { EmailService } from 'src/email/email.service';

@@ -1,7 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, Res } from '@nestjs/common';
 import { ReviewService } from './review.service';
 import { CreateReviewDto } from './dto/create-review.dto';
-import { UpdateReviewDto } from './dto/update-review.dto';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/stratergy/jwt.guard';
 import { Response } from 'express';
@@ -40,21 +39,9 @@ export class ReviewController {
     throw new Error(error)
    }
   }
-// lấy từng review
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.reviewService.findOne(+id);
-  }
-// sửa review
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateReviewDto: UpdateReviewDto) {
-    return this.reviewService.update(+id, updateReviewDto);
-  }
 
 
-// không xóa
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.reviewService.remove(+id);
-  }
+
+
+
 }

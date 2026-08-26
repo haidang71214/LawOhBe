@@ -1,10 +1,8 @@
-// accept-reject.enum.ts (hoặc file riêng cho enum)
+
 export enum AcceptRejectAction {
    REJECT = 'reject',
    ACCEPT = 'accept',
  }
- 
- // accept-reject.dto.ts
  import { ApiProperty } from '@nestjs/swagger';
  import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
 

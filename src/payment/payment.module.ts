@@ -3,7 +3,6 @@ import { PaymentService } from './payment.service';
 import { PaymentController } from './payment.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Booking, BookingSchema, LawyerPayment, LawyerPaymentSchema, Payment, PaymentSchema, User, UserSchema } from 'src/config/database.config';
-import { TokenHeheModule } from 'utils/token.module';
 import { EmailModule } from 'src/email/email.module';
 import { KeyModule } from 'src/key/key.module';
 import { JwtModule } from '@nestjs/jwt';

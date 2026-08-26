@@ -9,8 +9,6 @@ import { EmailModule } from 'src/email/email.module';
 import { ShareModule } from 'src/shared/sharedModule';
 import { TokenControllerService } from 'utils/token.utils';
 import { AuthModule } from 'src/auth/auth.module';
-import { PaymentModule } from 'src/payment/payment.module';
-import { UsersModule } from 'src/users/users.module';
 
 @Module({
   // mai làm booking

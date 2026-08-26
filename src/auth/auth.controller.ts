@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Res, HttpStatus, UseInterceptors, UploadedFile, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Res, UseInterceptors, UploadedFile, Req, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 
 import { Response } from 'express';

@@ -10,7 +10,6 @@ import { updatePriceBylawyerDto } from './dto/update-byLawyerDto';
 @Controller('price-range')
 export class PriceRangeController {
   constructor(private readonly priceRangeService: PriceRangeService) {}
-// luật su tự tạo 1 cái giá cho dịch vụ của mình
 @Post('/LawyerCustomPrice')
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
@@ -44,7 +43,7 @@ try {
   throw new Error(error)
 }
 }
-// lấy tất cả những cái range price theo market
+
   @Get()
   async findAll(@Res() res:Response) {
    try {
@@ -73,7 +72,7 @@ try {
   async update(@Param('type') type: string, @Body() updatePriceRangeDto: UpdatePriceRangeDto,@Req() req,@Res() res:Response) {
 try {
   const userId = req.user.userId
-  const response = await  this.priceRangeService.update(type, updatePriceRangeDto,userId);
+  await  this.priceRangeService.update(type, updatePriceRangeDto,userId);
   return res.status(200).json({message:"Update thành công"})
 } catch (error) {
   throw new Error(error)

@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import * as qs from 'qs';
 import * as crypto from 'crypto';
-import { Booking, LawyerPayment, Payment } from 'src/config/database.config';
+import { Payment } from 'src/config/database.config';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { AuthService } from 'src/auth/auth.service';
@@ -10,11 +9,9 @@ import { AuthService } from 'src/auth/auth.service';
 @Injectable()
 export class PaymentService {
   constructor(
-    private configService: ConfigService,
-    @InjectModel(Booking.name) private BookingModel: Model<Booking>,
+
     @InjectModel(Payment.name) private PaymentModel: Model<Payment>,
-    @InjectModel(LawyerPayment.name) private LawyerPaymentModel: Model<LawyerPayment>,
-    private readonly authService: AuthService
+  private readonly authService: AuthService
   ) {}
 
   async createPaymentUrl(

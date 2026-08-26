@@ -1,7 +1,7 @@
 
 import {  USER_ROLE } from './create-user.dto';
 import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsEnum, IsNotEmpty, IsOptional } from 'class-validator';
+import { IsEnum, IsOptional } from 'class-validator';
 
 export class UpdateUserDto {
    

@@ -1,9 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, Res, Query } from '@nestjs/common';
+import { Controller, Get, Body, Patch, Param, Delete, UseGuards, Req, Res, Query } from '@nestjs/common';
 import { LawyerService } from './lawyer.service';
 import { JwtAuthGuard } from 'src/auth/stratergy/jwt.guard';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { Response } from 'express';
-import { CreateVipPackageDto } from '../vip-package/dto/create-vippackage.dto';
 import { UpdateLawyerDto } from './dto/update-lawyer.dto';
 import { FilterLawyerDto } from './dto/filterLawyer.dto';
 import { CreateLawyerDto } from './dto/create-lawyer.dto';
@@ -19,7 +18,6 @@ export class LawyerController {
   @ApiBearerAuth()
   async findAll(
     @Res() res:Response,
-    @Req() req
   ) {
     try {
       const response = await this.lawyerService.findAllLawyer();
@@ -45,7 +43,6 @@ export class LawyerController {
       throw new Error(error)
     }
   }
-// làm thêm 1 cái là admin thay đổi
   @Patch('/adminCreatelawyer/:id')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
@@ -54,8 +51,7 @@ export class LawyerController {
   @Res() res:Response,
   @Req() req
 ) {
-  // update giới thiệu, update chuyên ngành với update chuyên ngành chi tiết
-  const userId = req.user.userId
+const userId = req.user.userId
     try {
       const results = await this.lawyerService.updateLawyer(createLawyerDto,userId,id)
       res.status(results.status).json(results.message)
@@ -68,9 +64,6 @@ export class LawyerController {
   remove(@Param('id') id: string) {
     return this.lawyerService.remove(+id);
   }
-// lấy những thứ liên quan tới thằng lawyer
-// cái typelawyer nó gán cái objectid vô
-
 @Get('filterLawyer')
 async getLawyer(@Query() filterDto: FilterLawyerDto, @Res() res: Response) {
   try {
@@ -88,7 +81,6 @@ async getLawyer(@Query() filterDto: FilterLawyerDto, @Res() res: Response) {
         }
       });
     }
-// lấy thêm giá tiền ở đây
     return res.status(200).json({
       message: ' CableLawyers fetched successfully',
       data: lawyers,
@@ -107,7 +99,6 @@ async getLawyer(@Query() filterDto: FilterLawyerDto, @Res() res: Response) {
     });
   }
 }
-// lấy id của thằng lawyer
 @Get('/vLawyer')
   async getDetailLawyer(
     @Query('id') id: string, // Lấy id từ query string

@@ -1,8 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { CloudUploadService } from 'src/shared/cloudUpload.service';
-import { EmailService } from 'src/email/email.service';
 import { Model } from 'mongoose';
 import { Booking, Review, User } from 'src/config/database.config';
 import { InjectModel } from '@nestjs/mongoose';
@@ -11,8 +9,6 @@ import { AuthService } from 'src/auth/auth.service';
 @Injectable()
 export class UsersService {
   constructor(
-    private readonly cloudUploadService: CloudUploadService,
-    private readonly mailService : EmailService, // mình đoán cái này sẽ có động tới mail
      private readonly authService  :AuthService,
    @InjectModel(User.name) private readonly user_model : Model<User>,
     @InjectModel(Booking.name) private BookingModel: Model<Booking>,
@@ -224,18 +220,15 @@ async updateTheoAdmin(
         const hashedPassword = await bcrypt.hash(password, 10);
         updateFields.password = hashedPassword;
       }
-
-      // Cập nhật user trong database
       const updatedUser = await this.user_model.findByIdAndUpdate(
         userId,
         { $set: updateFields },
-        { new: true }, // Trả về document đã cập nhật
+        { new: true }, 
       );
 
       if (!updatedUser) {
         throw new Error('User not found');
       }
-
       return {
         status: 200,
         message: 'Update thành công',
@@ -248,13 +241,12 @@ async updateTheoAdmin(
   
   async findShiet(userId: string) {
     try {
-      // Lấy danh sách booking theo client_id, chỉ chọn trường lawyer_id
       const bookings = await this.BookingModel.find(
-        { client_id: userId }, // Chỉ trả về lawyer_id, ẩn _id mặc định
+        { client_id: userId }, 
       );
       return {
         status: 200,
-        data: bookings, // trả về trực tiếp mảng booking gồm lawyer_id
+        data: bookings, 
       };
     } catch (error) {
       throw new Error(error);

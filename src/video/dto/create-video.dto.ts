@@ -1,5 +1,5 @@
 import { ApiHideProperty, ApiProperty } from "@nestjs/swagger";
-import { IsArray, IsNotEmpty } from "class-validator";
+import {  IsNotEmpty } from "class-validator";
 import { VideoLawCategory } from "src/config/database.config";
 
 export class CreateVideoDto {

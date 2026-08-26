@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { CreateCommentDto } from './dto/create-comment.dto';
-import { UpdateCommentDto } from './dto/update-comment.dto';
-import { Comment, User, Videos } from 'src/config/database.config';
+import { Comment } from 'src/config/database.config';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { AuthService } from 'src/auth/auth.service';
@@ -9,9 +8,7 @@ import { AuthService } from 'src/auth/auth.service';
 @Injectable()
 export class CommentService {
   constructor(
-    @InjectModel(User.name) private UserModel: Model<User>,
     @InjectModel(Comment.name) private CommentModel: Model<Comment>,
-    @InjectModel(Videos.name) private VideoModel: Model<Videos>,
     private readonly authService :AuthService
 
   ){

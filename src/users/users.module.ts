@@ -8,7 +8,6 @@ import { ShareModule } from 'src/shared/sharedModule';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthModule } from 'src/auth/auth.module';
 import { KeyModule } from 'src/key/key.module';
-import { VideoModule } from 'src/video/video.module';
 
 @Module({
   // có dòng này mới import được vào mongo
