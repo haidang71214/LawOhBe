@@ -7,7 +7,6 @@ import { MongooseModule, MongooseModuleOptions } from '@nestjs/mongoose';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { LawyerModule } from './lawyer/lawyer.module';
-import { VipPackageModule } from './vip-package/vip-package.module';
 import { BookingModule } from './booking/booking.module';
 import { PriceRangeModule } from './price-range/price-range.module';
 import { PaymentModule } from './payment/payment.module';
@@ -19,6 +18,7 @@ import { ClassificationModule } from './classification/classification.module';
 import { VideoModule } from './video/video.module';
 import { CommentModule } from './comment/comment.module';
 import { NewsModule } from './news/news.module';
+import { LearnPackageModule } from './learn-package/learn-package.module';
 
 @Module({
   imports: [
@@ -37,20 +37,18 @@ import { NewsModule } from './news/news.module';
     UsersModule,
     AuthModule,
     LawyerModule,
-    VipPackageModule,
     BookingModule,
     PriceRangeModule,
     StorageModule,
     PaymentModule,
     ReviewModule,
-    StorageModule,
     FormModule,
     MessageModule,
     ClassificationModule,
     VideoModule,
     CommentModule,
     NewsModule,
-    
+    LearnPackageModule,
   ],
 
   controllers: [AppController],

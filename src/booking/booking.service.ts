@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { AuthService } from 'src/auth/auth.service';
-import { Booking, CustomPrice, MarketPriceRange, Payment, Review, TypeLawyer, User, VipPackage } from 'src/config/database.config';
+import { Booking, CustomPrice, MarketPriceRange, Payment, Review, TypeLawyer, User } from 'src/config/database.config';
 import { Model, Types } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { EmailService } from 'src/email/email.service';
@@ -14,7 +14,6 @@ export class BookingService {
     private readonly mailService : EmailService,
     @InjectModel(User.name) private UserModel: Model<User>,
     @InjectModel(Booking.name) private BookingModel: Model<Booking>,
-    @InjectModel(VipPackage.name) private VipPackageModel: Model<VipPackage>,
     @InjectModel(TypeLawyer.name) private TypeLawyerModel: Model<TypeLawyer>,
     @InjectModel(Review.name) private ReviewModel: Model<Review>,
     @InjectModel(MarketPriceRange.name) private MarketPriceRangeModel: Model<MarketPriceRange>, // db set cứng khoảng giá

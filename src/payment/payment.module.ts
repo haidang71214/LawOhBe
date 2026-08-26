@@ -7,7 +7,7 @@ import { EmailModule } from 'src/email/email.module';
 import { KeyModule } from 'src/key/key.module';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthModule } from 'src/auth/auth.module';
-import { TokenControllerService } from 'utils/token.utils';
+import { TokenModule } from 'utils/token.module';
 import { ShareModule } from 'src/shared/sharedModule';
 
 @Module({
@@ -18,7 +18,7 @@ import { ShareModule } from 'src/shared/sharedModule';
       {name:LawyerPayment.name,schema:LawyerPaymentSchema},
       {name:Booking.name, schema:BookingSchema}
     ]),
-JwtModule.register({}),KeyModule,EmailModule,ShareModule,TokenControllerService,AuthModule
+    JwtModule.register({}),KeyModule,EmailModule,ShareModule,TokenModule,AuthModule
   ],
   controllers: [PaymentController],
   providers: [PaymentService],

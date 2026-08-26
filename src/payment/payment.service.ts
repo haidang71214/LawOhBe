@@ -1,7 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import * as qs from 'qs';
 import * as crypto from 'crypto';
-import { Payment } from 'src/config/database.config';
+import { LawyerPayment, Payment } from 'src/config/database.config';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { AuthService } from 'src/auth/auth.service';
@@ -9,9 +9,9 @@ import { AuthService } from 'src/auth/auth.service';
 @Injectable()
 export class PaymentService {
   constructor(
-
     @InjectModel(Payment.name) private PaymentModel: Model<Payment>,
-  private readonly authService: AuthService
+    @InjectModel(LawyerPayment.name) private LawyerPaymentModel: Model<LawyerPayment>,
+    private readonly authService: AuthService,
   ) {}
 
   async createPaymentUrl(
@@ -108,6 +108,97 @@ export class PaymentService {
       { status, ...additionalData, payment_date: new Date() },
       { new: true }
     );
+  }
+
+  // Tách hoa hồng khi thanh toán thành công (90% cho luật sư, 10% nền tảng)
+  async createLawyerPaymentSplit(payment: Payment) {
+    if (!payment.lawyer_id) return null;
+
+    const existing = await this.LawyerPaymentModel.findOne({ payment_id: payment._id });
+    if (existing) return existing;
+
+    const commissionRate = 0.10; // 10% hoa hồng nền tảng
+    const commission = Math.round(payment.amount * commissionRate);
+    const lawyerAmount = payment.amount - commission;
+
+    const lawyerPayment = await this.LawyerPaymentModel.create({
+      payment_id: payment._id,
+      lawyer_id: payment.lawyer_id,
+      amount: lawyerAmount,
+      commission: commission,
+      status: 'success',
+      transaction_no: `LP_${payment.transaction_no}`,
+      payment_date: new Date(),
+      payment_method: payment.payment_method || 'VNPAY',
+    });
+
+    return lawyerPayment;
+  }
+
+  // Lấy danh sách thanh toán nhận được của luật sư
+  async getLawyerPayments(lawyerId: string) {
+    const isLawyer = await this.authService.checkLawyer(lawyerId);
+    if (!isLawyer) {
+      throw new ForbiddenException('Chỉ luật sư mới có quyền truy cập');
+    }
+
+    const payments = await this.LawyerPaymentModel.find({ lawyer_id: lawyerId })
+      .populate('payment_id')
+      .sort({ createdAt: -1 });
+
+    return {
+      status: 200,
+      total: payments.length,
+      data: payments,
+    };
+  }
+
+  // Thống kê thu nhập & hoa hồng của luật sư
+  async getLawyerIncomeSummary(lawyerId: string) {
+    const isLawyer = await this.authService.checkLawyer(lawyerId);
+    if (!isLawyer) {
+      throw new ForbiddenException('Chỉ luật sư mới có quyền truy cập');
+    }
+
+    const payments = await this.LawyerPaymentModel.find({ lawyer_id: lawyerId, status: 'success' });
+    const totalGross = payments.reduce((sum, p) => sum + (p.amount + p.commission), 0);
+    const totalNet = payments.reduce((sum, p) => sum + p.amount, 0);
+    const totalCommission = payments.reduce((sum, p) => sum + p.commission, 0);
+
+    return {
+      status: 200,
+      summary: {
+        totalTransactions: payments.length,
+        totalGrossRevenue: totalGross,
+        totalNetIncome: totalNet,
+        totalPlatformCommission: totalCommission,
+        commissionRate: '10%',
+      },
+    };
+  }
+
+  // Admin xem toàn bộ danh sách tách hoa hồng và tổng doanh thu hoa hồng
+  async getLawyerPaymentsForAdmin(userId: string) {
+    const isAdmin = await this.authService.checkAdmin(userId);
+    if (!isAdmin) {
+      throw new ForbiddenException('Chỉ quản trị viên mới có quyền truy cập');
+    }
+
+    const payments = await this.LawyerPaymentModel.find()
+      .populate('lawyer_id', 'name email phone')
+      .populate('payment_id')
+      .sort({ createdAt: -1 });
+
+    const totalPlatformCommission = payments
+      .filter(p => p.status === 'success')
+      .reduce((sum, p) => sum + p.commission, 0);
+
+    return {
+      status: 200,
+      totalCommissionRevenue: totalPlatformCommission,
+      totalTransactions: payments.length,
+      data: payments,
+    };
   }
 
   async getPaymentForAdmin(userId: string) {

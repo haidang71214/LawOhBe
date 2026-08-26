@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/
 import { CloudUploadService } from 'src/shared/cloudUpload.service';
 import { EmailService } from 'src/email/email.service';
 import { AuthService } from 'src/auth/auth.service';
-import { Booking, CustomPrice, MarketPriceRange, Review, SubTypeLawyer, TypeLawyer, User, VipPackage } from 'src/config/database.config';
+import { Booking, CustomPrice, MarketPriceRange, Review, SubTypeLawyer, TypeLawyer, User } from 'src/config/database.config';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { UpdateLawyerDto } from './dto/update-lawyer.dto';

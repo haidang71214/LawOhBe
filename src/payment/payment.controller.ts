@@ -76,6 +76,9 @@ export class PaymentController {
         if (!payment) {
           throw new BadRequestException('Payment not found for transaction_no: ' + query['vnp_TxnRef']);
         }
+
+        // Tự động tách hoa hồng cho luật sư (90% luật sư, 10% nền tảng)
+        await this.paymentService.createLawyerPaymentSplit(payment);
        
         return res.redirect(`${URL_PRODUCTION}/payment-result?status=success&code=${responseCode}&txnRef=${query['vnp_TxnRef']}`);
       } else {
@@ -94,6 +97,18 @@ export class PaymentController {
   async handleVnpayIpn(@Query() query: any, @Res() res: Response) {
     const isValid = this.paymentService.verifyVnpayReturn(query);
     if (isValid) {
+      const orderId = query['vnp_TxnRef'];
+      const rspCode = query['vnp_ResponseCode'] || '00';
+      if (rspCode === '00') {
+        const payment = await this.PaymentModel.findOneAndUpdate(
+          { transaction_no: orderId },
+          { status: 'success', payment_date: new Date() },
+          { new: true }
+        );
+        if (payment) {
+          await this.paymentService.createLawyerPaymentSplit(payment);
+        }
+      }
       return res.status(200).json({ RspCode: '00', Message: 'Success' });
     } else {
       return res.status(200).json({ RspCode: '97', Message: 'Fail checksum' });
@@ -143,6 +158,33 @@ export class PaymentController {
     } catch (error) {
       throw new Error()
     }
+  }
+
+  @Get('/lawyerGetPayments')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  async getLawyerPayments(@Req() req, @Res() res: Response) {
+    const { userId } = req.user;
+    const result = await this.paymentService.getLawyerPayments(userId);
+    return res.status(result.status).json(result);
+  }
+
+  @Get('/lawyerIncomeSummary')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  async getLawyerIncomeSummary(@Req() req, @Res() res: Response) {
+    const { userId } = req.user;
+    const result = await this.paymentService.getLawyerIncomeSummary(userId);
+    return res.status(result.status).json(result);
+  }
+
+  @Get('/lawyerPaymentsForAdmin')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  async getLawyerPaymentsForAdmin(@Req() req, @Res() res: Response) {
+    const { userId } = req.user;
+    const result = await this.paymentService.getLawyerPaymentsForAdmin(userId);
+    return res.status(result.status).json(result);
   }
 
   @Get('/getPaymentSuccessOrFail/:id')

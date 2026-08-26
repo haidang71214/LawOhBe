@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 import { MongooseModule } from '@nestjs/mongoose';
-import { Booking, BookingSchema, Comment, CommentSchema, Conversation, ConversationSchema, LearnPackage, LearnPackageSchema, Message, MessageSchema, Review, ReviewSchema, SubTypeLawyer, SubTypeLawyerSchema, TypeLawyer, TypeLawyerSchema, User, UserSchema, Videos, VideoSchema, VipPackage, VipPackageSchema } from 'src/config/database.config';
+import { Booking, BookingSchema, Comment, CommentSchema, Conversation, ConversationSchema, LearnPackage, LearnPackageSchema, Message, MessageSchema, Review, ReviewSchema, SubTypeLawyer, SubTypeLawyerSchema, TypeLawyer, TypeLawyerSchema, User, UserSchema, Videos, VideoSchema } from 'src/config/database.config';
 import { EmailModule } from 'src/email/email.module';
 import { ShareModule } from 'src/shared/sharedModule';
 import { JwtModule } from '@nestjs/jwt';
@@ -15,7 +15,6 @@ import { KeyModule } from 'src/key/key.module';
   // import mấy cái bên ngoài vào
     MongooseModule.forFeature([
       { name: User.name, schema: UserSchema },
-      { name: VipPackage.name, schema: VipPackageSchema },
       { name: LearnPackage.name, schema: LearnPackageSchema },
       {name:TypeLawyer.name,schema: TypeLawyerSchema},
       {name:SubTypeLawyer.name,schema :SubTypeLawyerSchema},

@@ -96,78 +96,37 @@ export class User extends Document {
   @Prop({ type:MongooseSchema.Types.ObjectId,ref:'Booking' })
   bookings:Types.ObjectId;
   
-  // gói thuê (user)
-  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'VipPackage' }) // lấy từ schema VipPackage
-  vip_package: Types.ObjectId;
   // gói học(user)
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'LearnPackage' })
   learn_package: Types.ObjectId;
 }
 
+// learn package
+@Schema({ 
+  timestamps: true,
+  collection: 'learn_packages',
+}) 
+export class LearnPackage extends Document {
+  @Prop({ required: true })
+  name: string;
 
-// gói này mình thay đổi thành
-// vip 1, mở các form mẫu đơn free, trong 1 tháng
-// vip 2, giảm giá booking, trong 3 tháng, có đặc quyền của vip 1
-// vip 3, đang nghĩ =)))
-@Schema({ timestamps: true, collection: 'vip_packages' })
-export class VipPackage extends Document {
-  @Prop({ required: true, default: 'none', enum: ['none','standard','gold','deluxe'] })
-  type: string;
-
-  @Prop({ required: true, default: 0 })
+  @Prop({ required: true })
   price: number;
 
-  @Prop({ required: true })
-  desctiption: string; // mô tả quyền lợi
+  @Prop({ default: 'none', enum: ['none', 'standard', 'gold', 'deluxe'] })
+  type: string;
 
   @Prop()
-  vip_expired: Date; // 1 cái vip thì sẽ có 1 khoảng thời gian
-//
-  @Prop({ type: [String] })
-  benefits: string[]; // chức năng được buff với gói vip
-}
+  description: string;
 
-// bảng phụ, bảng trên cho phép luật sư tạo gói vip, bảng dưới cho phép nhiều client dùng gói hay gì đó 
-@Schema({ timestamps: true, collection: 'vip_clients' })
-export class VipClient extends Document {
-  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
-  client_id: Types.ObjectId;
+  @Prop()
+  learn_start: Date;
 
-  @Prop({ type: Types.ObjectId, ref: 'VipPackage', required: true })
-  vip_package_id: Types.ObjectId;
-
-  @Prop({ required: true })
-  vip_start: Date;
-
-  @Prop({ required: true })
-  vip_expired: Date;
+  @Prop()
+  learn_end: Date;
 
   @Prop({ default: true })
   is_active: boolean;
-}
-
-
-
-// learn package
-@Schema({ timestamps: true,
-   collection: 'learn_packages',
- }) 
-export class LearnPackage extends Document {
-  // tên gói
-  @Prop({ required: true })
-  name: string;
-  // giá
-  @Prop({ required: true })
-  price: number;
-  // loại gói, sửa thành ngày tháng năm
-  @Prop({default:'none',enum:['none','standard','gold','deluxe']})
-  type: string;
-  // ngày bắt đầu
-  @Prop()
-  learn_start: Date;
-  // ngày hết hạn
-  @Prop()
-  learn_end: Date;
 }
 // loại luật sư
 @Schema({ 
@@ -408,10 +367,8 @@ export const LawyerPaymentSchema = SchemaFactory.createForClass(LawyerPayment) /
 export const CustomPriceSchema = SchemaFactory.createForClass(CustomPrice);
 export const MarketPriceRangeSchema = SchemaFactory.createForClass(MarketPriceRange);
 export const UserSchema = SchemaFactory.createForClass(User);
-export const VipPackageSchema = SchemaFactory.createForClass(VipPackage);
 export const LearnPackageSchema = SchemaFactory.createForClass(LearnPackage);
 export const TypeLawyerSchema = SchemaFactory.createForClass(TypeLawyer);
 export const SubTypeLawyerSchema = SchemaFactory.createForClass(SubTypeLawyer); 
 export const BookingSchema = SchemaFactory.createForClass(Booking);
 export const ReviewSchema = SchemaFactory.createForClass(Review);
-export const VipClientSchema = SchemaFactory.createForClass(VipClient)
