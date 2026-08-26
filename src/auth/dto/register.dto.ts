@@ -20,10 +20,10 @@ export class RegisterDto {
    name: string;
 
    @ApiProperty({ type: 'string', format: 'binary',required:false })
-   img?: any;
+   img?: any; // lấy ảnh lên
 
    @ApiHideProperty()
-   avartar_url: string;
+   avartar_url: string; // lưu url về
 
    @ApiProperty()
    age: number;

@@ -1,1 +1,1 @@
-export class CreateLawyerDto {}
+// export class UpdateLawyerDto {}

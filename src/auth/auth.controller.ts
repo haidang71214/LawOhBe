@@ -10,7 +10,7 @@ import { CloudUploadService } from 'src/shared/cloudUpload.service';
 import { SendToken } from './dto/sendTokenReset.dto';
 import { changePass } from './dto/changePass.dto';
 import { LoginFacebookDto } from './dto/loginFacebook.dto';
-import {  TokenHeheControllerService } from 'utils/token.utils';
+import {  TokenControllerService } from 'utils/token.utils';
 import { Model } from 'mongoose';
 import { User } from 'src/config/database.config';
 import { CustomRequest } from './custom-request';
@@ -23,7 +23,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService,
   private readonly cloudUploadService : CloudUploadService,
   @InjectModel(User.name) private readonly userModel: Model<User>, 
-private readonly TokenHeheControllerService: TokenHeheControllerService
+private readonly TokenHeheControllerService: TokenControllerService
   ) {}
 // đăng nhập, trả ra token 
   @Post("/loginUser")
@@ -43,7 +43,8 @@ private readonly TokenHeheControllerService: TokenHeheControllerService
   @Post('register')
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('img'))
-  async register(@Res() res, @Body() body: RegisterDto, @UploadedFile() file: Express.Multer.File) {
+  async register(@Res() res, @Body() body: RegisterDto,
+   @UploadedFile() file: Express.Multer.File) {
   if (file) {
       try {
         const uploadResult = await this.cloudUploadService.uploadImage(file, 'avatar');
@@ -61,7 +62,7 @@ private readonly TokenHeheControllerService: TokenHeheControllerService
   @Body() body: SendToken, 
   @Res() res: Response        
   ): Promise<any> {
-  const {email} = body
+  const email = body.email
   try {
     const response = await this.authService.forGotPass(email);
     return res.status(response.status).json(response.message);

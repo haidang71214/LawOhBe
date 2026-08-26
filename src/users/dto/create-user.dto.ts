@@ -4,7 +4,7 @@ import { IsEmail, IsEnum, IsNotEmpty, IsOptional } from "class-validator";
 export enum USER_ROLE{
    AVAILABLE = 'user',
    ADMIN = 'admin',
-   LAWYER = 'laywer',
+   LAWYER = 'lawyer',
 }
 
 export class CreateUserDto {

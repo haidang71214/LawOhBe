@@ -103,7 +103,6 @@ export class UsersController {
       if (!currentUser) {
         return res.status(404).send({ message: 'User not found' });
       }
-
       if (file) {
         const uploadResult = await this.cloudUploadService.uploadImage(
           file,
