@@ -3,7 +3,8 @@ import { CreateVideoDto } from './dto/create-video.dto';
 import { Comment, User, Videos } from 'src/config/database.config';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { AcceptRejectAction, AcceptRejectDto } from './dto/acceptRejectBody';
+import { AcceptRejectDto } from './dto/acceptRejectBody';
+import { AcceptRejectAction } from 'libs/constant';
 import { EmailService } from 'src/email/email.service';
 import { AuthService } from 'src/auth/auth.service';
 

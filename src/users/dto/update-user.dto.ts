@@ -1,5 +1,5 @@
 
-import {  USER_ROLE } from './create-user.dto';
+import { USER_ROLE } from 'libs/constant';
 import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsOptional } from 'class-validator';
 

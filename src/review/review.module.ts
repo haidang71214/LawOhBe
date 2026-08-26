@@ -2,7 +2,15 @@ import { Module } from '@nestjs/common';
 import { ReviewService } from './review.service';
 import { ReviewController } from './review.controller';
 import { MongooseModule } from '@nestjs/mongoose';
-import { Booking, BookingSchema, CustomPrice, CustomPriceSchema, MarketPriceRange, MarketPriceRangeSchema, Review, ReviewSchema, SubTypeLawyer, SubTypeLawyerSchema, TypeLawyer, TypeLawyerSchema, User, UserSchema } from 'src/config/database.config';
+import {
+  UserDestination,
+  BookingDestination,
+  TypeLawyerDestination,
+  SubTypeLawyerDestination,
+  ReviewDestination,
+  MarketPriceRangeDestination,
+  CustomPriceDestination,
+} from 'libs/schemas';
 import { AuthModule } from 'src/auth/auth.module';
 import { TokenControllerService } from 'utils/token.utils';
 import { ShareModule } from 'src/shared/sharedModule';
@@ -11,17 +19,22 @@ import { KeyModule } from 'src/key/key.module';
 import { JwtModule } from '@nestjs/jwt';
 
 @Module({
-  imports:[
+  imports: [
     MongooseModule.forFeature([
-      {name:User.name,schema:UserSchema},
-      {name:Booking.name,schema:BookingSchema},
-      {name:TypeLawyer.name,schema: TypeLawyerSchema},
-      {name:SubTypeLawyer.name,schema :SubTypeLawyerSchema},
-      {name:Review.name,schema:ReviewSchema},
-      {name:MarketPriceRange.name,schema:MarketPriceRangeSchema},
-      {name:CustomPrice.name,schema:CustomPriceSchema}
+      UserDestination,
+      BookingDestination,
+      TypeLawyerDestination,
+      SubTypeLawyerDestination,
+      ReviewDestination,
+      MarketPriceRangeDestination,
+      CustomPriceDestination,
     ]),
-     JwtModule.register({}),KeyModule,EmailModule,ShareModule,TokenControllerService,AuthModule
+    JwtModule.register({}),
+    KeyModule,
+    EmailModule,
+    ShareModule,
+    TokenControllerService,
+    AuthModule,
   ],
   controllers: [ReviewController],
   providers: [ReviewService],
