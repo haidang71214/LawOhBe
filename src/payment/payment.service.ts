@@ -10,7 +10,8 @@ import { AuthService } from 'src/auth/auth.service';
 export class PaymentService {
   constructor(
     @InjectModel(Payment.name) private PaymentModel: Model<Payment>,
-    @InjectModel(LawyerPayment.name) private LawyerPaymentModel: Model<LawyerPayment>,
+    @InjectModel(LawyerPayment.name)
+    private LawyerPaymentModel: Model<LawyerPayment>,
     private readonly authService: AuthService,
   ) {}
 
@@ -21,7 +22,7 @@ export class PaymentService {
     bankCode?: string,
     clientId?: string,
     lawyerId?: string,
-    bookingId?:string
+    bookingId?: string,
   ): Promise<{ paymentUrl: string; txnRef: string }> {
     const tmnCode = process.env.VNP_TMN_CODE;
     const secretKey = process.env.VNP_HASH_SECRET;
@@ -67,11 +68,17 @@ export class PaymentService {
     const signed = hmac.update(Buffer.from(signData, 'utf-8')).digest('hex');
     sortedParams['vnp_SecureHash'] = signed;
 
-    await this.PaymentModel.findOneAndUpdate({booking_id:bookingId},{
-      transaction_no:orderId
-    })
-    
-    return { paymentUrl: `${vnpUrl}?${qs.stringify(sortedParams, { encode: false })}`, txnRef: orderId };
+    await this.PaymentModel.findOneAndUpdate(
+      { booking_id: bookingId },
+      {
+        transaction_no: orderId,
+      },
+    );
+
+    return {
+      paymentUrl: `${vnpUrl}?${qs.stringify(sortedParams, { encode: false })}`,
+      txnRef: orderId,
+    };
   }
 
   verifyVnpayReturn(query: any): boolean {
@@ -88,7 +95,9 @@ export class PaymentService {
 
     const secretKey = process.env.VNP_HASH_SECRET;
     if (!secretKey) {
-      throw new Error('VNP_HASH_SECRET is not defined in the environment variables');
+      throw new Error(
+        'VNP_HASH_SECRET is not defined in the environment variables',
+      );
     }
 
     const signData = qs.stringify(sortedParams, { encode: false });
@@ -102,11 +111,15 @@ export class PaymentService {
     return num < 10 ? `0${num}` : num.toString();
   }
 
-  async updatePaymentStatus(orderId: string, status: string, additionalData: any) {
+  async updatePaymentStatus(
+    orderId: string,
+    status: string,
+    additionalData: any,
+  ) {
     return await this.PaymentModel.findOneAndUpdate(
       { transaction_no: orderId },
       { status, ...additionalData, payment_date: new Date() },
-      { new: true }
+      { new: true },
     );
   }
 
@@ -114,10 +127,12 @@ export class PaymentService {
   async createLawyerPaymentSplit(payment: Payment) {
     if (!payment.lawyer_id) return null;
 
-    const existing = await this.LawyerPaymentModel.findOne({ payment_id: payment._id });
+    const existing = await this.LawyerPaymentModel.findOne({
+      payment_id: payment._id,
+    });
     if (existing) return existing;
 
-    const commissionRate = 0.10; // 10% hoa hồng nền tảng
+    const commissionRate = 0.1; // 10% hoa hồng nền tảng
     const commission = Math.round(payment.amount * commissionRate);
     const lawyerAmount = payment.amount - commission;
 
@@ -160,8 +175,14 @@ export class PaymentService {
       throw new ForbiddenException('Chỉ luật sư mới có quyền truy cập');
     }
 
-    const payments = await this.LawyerPaymentModel.find({ lawyer_id: lawyerId, status: 'success' });
-    const totalGross = payments.reduce((sum, p) => sum + (p.amount + p.commission), 0);
+    const payments = await this.LawyerPaymentModel.find({
+      lawyer_id: lawyerId,
+      status: 'success',
+    });
+    const totalGross = payments.reduce(
+      (sum, p) => sum + (p.amount + p.commission),
+      0,
+    );
     const totalNet = payments.reduce((sum, p) => sum + p.amount, 0);
     const totalCommission = payments.reduce((sum, p) => sum + p.commission, 0);
 
@@ -190,7 +211,7 @@ export class PaymentService {
       .sort({ createdAt: -1 });
 
     const totalPlatformCommission = payments
-      .filter(p => p.status === 'success')
+      .filter((p) => p.status === 'success')
       .reduce((sum, p) => sum + p.commission, 0);
 
     return {
@@ -215,24 +236,24 @@ export class PaymentService {
     }
   }
 
-  async getUserPayment(userId:string){
+  async getUserPayment(userId: string) {
     try {
-      const response = await this.PaymentModel.find({client_id:userId})
-      return response  
+      const response = await this.PaymentModel.find({ client_id: userId });
+      return response;
     } catch (error) {
-      throw new Error(error)
+      throw new Error(error);
     }
   }
 
-  async getPaymentSuccessOrFail(id:String) {
+  async getPaymentSuccessOrFail(id: string) {
     try {
-      const response = await this.PaymentModel.findById(id)
+      const response = await this.PaymentModel.findById(id);
       return {
-        status:200,
-        data:response
-      }
+        status: 200,
+        data: response,
+      };
     } catch (error) {
-      throw new Error(error)
+      throw new Error(error);
     }
   }
 }

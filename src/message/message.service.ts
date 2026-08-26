@@ -3,11 +3,11 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Conversation, Message } from 'src/config/database.config';
 
-
 @Injectable()
 export class ChatService {
   constructor(
-    @InjectModel(Conversation.name) private conversationModel: Model<Conversation>,
+    @InjectModel(Conversation.name)
+    private conversationModel: Model<Conversation>,
     @InjectModel(Message.name) private messageModel: Model<Message>,
   ) {}
 
@@ -25,10 +25,16 @@ export class ChatService {
 
   // lấy hội thoại của cái user đó
   async getConversationsForUser(userId: string): Promise<Conversation[]> {
-    return this.conversationModel.find({ participants: userId }).populate('participants');
+    return this.conversationModel
+      .find({ participants: userId })
+      .populate('participants');
   }
 
-  async addMessage(conversationId: string, senderId: string, content: string): Promise<Message> {
+  async addMessage(
+    conversationId: string,
+    senderId: string,
+    content: string,
+  ): Promise<Message> {
     const message = new this.messageModel({
       conversation: conversationId,
       sender: senderId, // đây
@@ -39,22 +45,26 @@ export class ChatService {
   }
 
   async getMessages(conversationId: string): Promise<Message[]> {
-    return this.messageModel.find({ conversation: conversationId }).sort({ createdAt: 1 }).populate('sender');
-  };
+    return this.messageModel
+      .find({ conversation: conversationId })
+      .sort({ createdAt: 1 })
+      .populate('sender');
+  }
 
-
-  async checkConversationExists(clientId: String, lawyerId: String) {
+  async checkConversationExists(clientId: string, lawyerId: string) {
     try {
       const conversation = await this.conversationModel
         .findOne({
-          participants: [clientId, lawyerId]
+          participants: [clientId, lawyerId],
         })
         .populate('participants')
         .exec();
 
       return conversation;
     } catch (error) {
-      throw new NotFoundException(`Không tìm thấy cuộc hội thoại giữa ${clientId} và ${lawyerId}`);
+      throw new NotFoundException(
+        `Không tìm thấy cuộc hội thoại giữa ${clientId} và ${lawyerId}`,
+      );
     }
-}
+  }
 }

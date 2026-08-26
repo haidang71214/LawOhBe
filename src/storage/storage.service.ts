@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { extname, join, resolve } from 'path';
 import * as fs from 'fs/promises';
 
@@ -11,7 +15,9 @@ export class StorageService {
     try {
       await fs.mkdir(this.storageDir, { recursive: true });
     } catch (error: any) {
-      throw new BadRequestException(`Error creating directory: ${error.message}`);
+      throw new BadRequestException(
+        `Error creating directory: ${error.message}`,
+      );
     }
   }
 
@@ -38,7 +44,9 @@ export class StorageService {
     try {
       const resolvedPath = resolve(filePath);
       if (!resolvedPath.startsWith(resolve(this.storageDir))) {
-        throw new BadRequestException('Invalid file path: Access outside storage directory is not allowed!');
+        throw new BadRequestException(
+          'Invalid file path: Access outside storage directory is not allowed!',
+        );
       }
       await fs.access(resolvedPath);
       await fs.unlink(resolvedPath);
@@ -78,12 +86,16 @@ export class StorageService {
   }
 
   // Download file by file path
-  async downloadFile(filePath: string): Promise<{ fileBuffer: Buffer; fileName: string; mimeType: string }> {
+  async downloadFile(
+    filePath: string,
+  ): Promise<{ fileBuffer: Buffer; fileName: string; mimeType: string }> {
     try {
       const resolvedPath = resolve(filePath);
       // Kiểm tra xem đường dẫn có nằm trong storageDir không
       if (!resolvedPath.startsWith(resolve(this.storageDir))) {
-        throw new BadRequestException('Invalid file path: Access outside storage directory is not allowed!');
+        throw new BadRequestException(
+          'Invalid file path: Access outside storage directory is not allowed!',
+        );
       }
       // Kiểm tra sự tồn tại của file
       await fs.access(resolvedPath);
@@ -98,6 +110,4 @@ export class StorageService {
       throw new BadRequestException(`Error downloading file: ${error.message}`);
     }
   }
-  
-  
 }

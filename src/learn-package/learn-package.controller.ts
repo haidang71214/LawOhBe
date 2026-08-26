@@ -1,4 +1,15 @@
-﻿import { Body, Controller, Delete, Get, Param, Patch, Post, Req, Res, UseGuards } from '@nestjs/common';
+﻿import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
 import { JwtAuthGuard } from 'src/auth/stratergy/jwt.guard';
@@ -58,11 +69,7 @@ export class LearnPackageController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Admin xóa một gói học' })
-  async remove(
-    @Param('id') id: string,
-    @Req() req,
-    @Res() res: Response,
-  ) {
+  async remove(@Param('id') id: string, @Req() req, @Res() res: Response) {
     const { userId } = req.user;
     const result = await this.learnPackageService.remove(id, userId);
     return res.status(result.status).json(result);
@@ -72,11 +79,7 @@ export class LearnPackageController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Người dùng đăng ký tham gia gói học' })
-  async subscribe(
-    @Param('id') id: string,
-    @Req() req,
-    @Res() res: Response,
-  ) {
+  async subscribe(@Param('id') id: string, @Req() req, @Res() res: Response) {
     const { userId } = req.user;
     const result = await this.learnPackageService.subscribe(id, userId);
     return res.status(result.status).json(result);

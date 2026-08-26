@@ -29,11 +29,13 @@ import { LearnPackageModule } from './learn-package/learn-package.module';
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
-        uri:configService.get<string>('MONGODB_URI') ||configService.get<string>('MONGODB_URL'),
+        uri:
+          configService.get<string>('MONGODB_URI') ||
+          configService.get<string>('MONGODB_URL'),
       }),
       inject: [ConfigService],
     }),
-    
+
     UsersModule,
     AuthModule,
     LawyerModule,

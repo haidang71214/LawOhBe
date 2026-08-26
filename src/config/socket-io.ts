@@ -6,24 +6,28 @@ export function setupSocketIo(app: INestApplication, chatService: ChatService) {
   const server = app.getHttpServer();
   const io = new Server(server, { cors: { origin: '*' } });
 
-  io.on('connection', socket => {
+  io.on('connection', (socket) => {
     socket.on('joinRoom', (roomId) => {
       socket.join(roomId);
     });
 
-    socket.on('register',(clientId)=>{
+    socket.on('register', (clientId) => {
       io.to('dashboard').emit('user-online', { clientId, isOnline: true });
-    })
+    });
 
     socket.on('sendMessage', async ({ conversationId, senderId, content }) => {
-      const message = await chatService.addMessage(conversationId, senderId, content);
+      const message = await chatService.addMessage(
+        conversationId,
+        senderId,
+        content,
+      );
       io.to(conversationId).emit('newMessage', message);
     });
 
     socket.on('join-dashboard', () => {
-      socket.join("dashboard");
-      socket.emit("dashboard-joined");
-    })
+      socket.join('dashboard');
+      socket.emit('dashboard-joined');
+    });
 
     socket.on('join-video-room', (roomId, clientId, requestClientId) => {
       socket.join(roomId);
@@ -31,9 +35,17 @@ export function setupSocketIo(app: INestApplication, chatService: ChatService) {
       const numClients = room ? room.size : 0;
 
       if (numClients === 1) {
-        io.to('dashboard').emit('room-update', { roomId, status: 'waiting', clients: [clientId, requestClientId] });
+        io.to('dashboard').emit('room-update', {
+          roomId,
+          status: 'waiting',
+          clients: [clientId, requestClientId],
+        });
       } else if (numClients === 2) {
-        io.to('dashboard').emit('room-update', { roomId, status: 'started', clients: [requestClientId, clientId] });
+        io.to('dashboard').emit('room-update', {
+          roomId,
+          status: 'started',
+          clients: [requestClientId, clientId],
+        });
       }
     });
 
@@ -52,10 +64,13 @@ export function setupSocketIo(app: INestApplication, chatService: ChatService) {
           }
         }
       }
-      io.to('dashboard').emit('room-update', { roomId, status: 'rejected', clients: [] });
+      io.to('dashboard').emit('room-update', {
+        roomId,
+        status: 'rejected',
+        clients: [],
+      });
     });
 
     socket.on('disconnect', () => {});
   });
-  
 }

@@ -2,7 +2,11 @@ import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { GoogleGenerativeAI, GenerativeModel, GenerateContentResult } from '@google/generative-ai';
+import {
+  GoogleGenerativeAI,
+  GenerativeModel,
+  GenerateContentResult,
+} from '@google/generative-ai';
 import { ClassificationRequestDto } from './classification.dto';
 import { TypeLawyer, User, ETypeLawyer } from 'src/config/database.config';
 
@@ -24,10 +28,10 @@ export class ClassificationService {
     this.model = this.client.getGenerativeModel({ model: 'gemini-2.0-flash' });
   }
 
-  async classifyText(request: ClassificationRequestDto){
+  async classifyText(request: ClassificationRequestDto) {
     try {
       const result: GenerateContentResult = await this.model.generateContent(
-        `Understand the input and perform task: ${request.text}. Task: Classify the input into one of these categories ('INSURANCE', 'CORPORATE', 'CRIMINAL', 'INTELLECTUAL_PROPERTY', 'CIVIL', 'TRANSPORTATION', 'FAMILY', 'INHERITANCE', 'LAND', 'ADMINISTRATIVE', 'LABOR', 'TAX'). Just give me only the category, not generate more text`
+        `Understand the input and perform task: ${request.text}. Task: Classify the input into one of these categories ('INSURANCE', 'CORPORATE', 'CRIMINAL', 'INTELLECTUAL_PROPERTY', 'CIVIL', 'TRANSPORTATION', 'FAMILY', 'INHERITANCE', 'LAND', 'ADMINISTRATIVE', 'LABOR', 'TAX'). Just give me only the category, not generate more text`,
       );
 
       let category = result.response.text().trim();
@@ -45,7 +49,7 @@ export class ClassificationService {
         }
       }
 
-      let lawyerList: [] = [];
+      const lawyerList: [] = [];
 
       if (category !== 'UNKNOWN') {
         const typeLawyers = await this.typeLawyerModel
@@ -53,28 +57,35 @@ export class ClassificationService {
           .exec();
 
         if (typeLawyers.length > 0) {
-          const lawyerIds = typeLawyers.map(typeLawyer => typeLawyer.lawyer_id);
+          const lawyerIds = typeLawyers.map(
+            (typeLawyer) => typeLawyer.lawyer_id,
+          );
 
           const lawyers = await this.userModel
             .find({
               _id: { $in: lawyerIds },
               role: 'lawyer',
-            }).populate('typeLawyer')
+            })
+            .populate('typeLawyer')
             .sort({ star: -1, experienceYear: -1 }) // Sort by star rating and experience (descending)
             .exec();
 
-           const lawyerList = lawyers.map(lawyer => ({...(lawyer.toObject() as any),access_token: undefined, refresh_token: undefined,password:undefined,reviews:undefined}));
-      
-      return {
-        category,
-        input_text: request.text,
-        lawyers: [...lawyerList],
-      };
+          const lawyerList = lawyers.map((lawyer) => ({
+            ...(lawyer.toObject() as any),
+            access_token: undefined,
+            refresh_token: undefined,
+            password: undefined,
+            reviews: undefined,
+          }));
+
+          return {
+            category,
+            input_text: request.text,
+            lawyers: [...lawyerList],
+          };
         }
       }
-    
     } catch (error) {
-      
       if (error instanceof Error && error.message.includes('API')) {
         throw new HttpException(
           `Lỗi khi gọi Gemini API: ${error.message}`,

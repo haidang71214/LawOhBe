@@ -1,27 +1,39 @@
-import { Controller, Post, Body, Get, Param, Req, UseGuards, Res } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  Param,
+  Req,
+  UseGuards,
+  Res,
+} from '@nestjs/common';
 import { ChatService } from './message.service';
 import { CreateConversationDto } from './dto/update-message.dto';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/stratergy/jwt.guard';
 import { Response } from 'express';
 
-
 @Controller('chat')
 export class ChatController {
-  constructor(private readonly chatService: ChatService   ) {}
+  constructor(private readonly chatService: ChatService) {}
 
-// tạo cái cuộc hội thoại mới
-// hoặc giữa luật sư với người user hoặc theo nhóm á
-@Post('conversation')
-async createConversation(@Body() createConversationDto: CreateConversationDto) {
-  return this.chatService.createConversation(createConversationDto.participants);
-}
-// lấy hội thoại của cái user đó
+  // tạo cái cuộc hội thoại mới
+  // hoặc giữa luật sư với người user hoặc theo nhóm á
+  @Post('conversation')
+  async createConversation(
+    @Body() createConversationDto: CreateConversationDto,
+  ) {
+    return this.chatService.createConversation(
+      createConversationDto.participants,
+    );
+  }
+  // lấy hội thoại của cái user đó
   @Get('conversations/:userId')
   async getUserConversations(@Param('userId') userId: string) {
     return this.chatService.getConversationsForUser(userId);
   }
-// api gửi tin nhắn
+  // api gửi tin nhắn
   @Post('message')
   async sendMessage(
     @Body('conversationId') conversationId: string,
@@ -31,29 +43,29 @@ async createConversation(@Body() createConversationDto: CreateConversationDto) {
     return this.chatService.addMessage(conversationId, senderId, content);
   }
 
-  
-// api lấy đoạn hội thoại
+  // api lấy đoạn hội thoại
   @Get('messages/:conversationId')
   async getMessages(@Param('conversationId') conversationId: string) {
     return this.chatService.getMessages(conversationId);
   }
- 
+
   @Get('/checkConversation/:lawyerId')
- @UseGuards(JwtAuthGuard)
- @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   async checkConversation(
-    @Param('lawyerId') lawyerId:String,
+    @Param('lawyerId') lawyerId: string,
     @Req() req,
-    @Res() res:Response
-  )
-  {
+    @Res() res: Response,
+  ) {
     try {
-      const {userId} = req.user
-      const data = await this.chatService.checkConversationExists(userId,lawyerId)
-      return res.status(200).json({data})
+      const { userId } = req.user;
+      const data = await this.chatService.checkConversationExists(
+        userId,
+        lawyerId,
+      );
+      return res.status(200).json({ data });
     } catch (error) {
-      throw new Error(error)
+      throw new Error(error);
     }
   }
-
 }

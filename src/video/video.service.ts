@@ -14,83 +14,88 @@ export class VideoService {
     @InjectModel(Videos.name) private VideosModel: Model<Videos>,
     @InjectModel(Comment.name) private CommentModel: Model<Comment>,
     @InjectModel(User.name) private UserModel: Model<User>,
-    private readonly emailService:EmailService,
-    private readonly authService : AuthService
-  ){}
-// người dùng tạo video mới
-  async create(createVideoDto: CreateVideoDto,userId:string) {
+    private readonly emailService: EmailService,
+    private readonly authService: AuthService,
+  ) {}
+  // người dùng tạo video mới
+  async create(createVideoDto: CreateVideoDto, userId: string) {
     try {
-    // lấy cái video url từ cái video gán vô
+      // lấy cái video url từ cái video gán vô
       const checkUser = await this.UserModel.findById(userId);
-      if(!checkUser){
+      if (!checkUser) {
         return {
-          status:404,
-          message:'hong xác phải user'
-        }
+          status: 404,
+          message: 'hong xác phải user',
+        };
       }
-      const {categories,video_url,description,thubnail_url} = createVideoDto
+      const { categories, video_url, description, thubnail_url } =
+        createVideoDto;
       const data = await this.VideosModel.create({
-        user_id:userId,
-        star:0,
+        user_id: userId,
+        star: 0,
         description,
         video_url,
-        thumnail_url:thubnail_url,
+        thumnail_url: thubnail_url,
         categories,
-        accept:false
-      })
+        accept: false,
+      });
       return {
-        status:200,
-        mnessage:data
-      }
+        status: 200,
+        mnessage: data,
+      };
     } catch (error) {
       throw new Error(error);
-      
     }
   }
 
-  async findAll(filterObj:any) {
-   try {
-    const {page,limit,type} = filterObj
-    const whereCondition:any = {
-      accept:true
-    };
-    // gán khi có
-    if(type){
-      whereCondition.categories = type
+  async findAll(filterObj: any) {
+    try {
+      const { page, limit, type } = filterObj;
+      const whereCondition: any = {
+        accept: true,
+      };
+      // gán khi có
+      if (type) {
+        whereCondition.categories = type;
+      }
+      const skip = (page - 1) * limit;
+      // lấy 2 cái này từ cái hàm đồng bộ xong in ra
+      const [item, total] = await Promise.all([
+        this.VideosModel.find(whereCondition).skip(skip).limit(limit).exec(),
+        this.VideosModel.countDocuments(whereCondition).exec(),
+      ]);
+      // item là chính nó, total: tổng. page:, limit
+      return {
+        item,
+        total,
+        page,
+        limit,
+      };
+    } catch (error) {
+      throw new Error(error);
     }
-    const skip = (page - 1)*limit;
-    // lấy 2 cái này từ cái hàm đồng bộ xong in ra
-    const [item,total] = await Promise.all([
-      this.VideosModel.find(whereCondition).skip(skip).limit(limit).exec(),
-      this.VideosModel.countDocuments(whereCondition).exec()
-    ])
-    // item là chính nó, total: tổng. page:, limit
-    return{
-      item,total,page,limit
-    }
-   } catch (error) {
-    throw new Error(error)
-   }
   }
 
   // admin duyệt video
-// admin xóa video/ nêu rõ lí do, gửi về gmail
+  // admin xóa video/ nêu rõ lí do, gửi về gmail
 
   async findOne(id: string) {
     try {
       const data = await this.VideosModel.findById(id).populate({
-        path:'user_id',
-        select:'name'
-      })
-      const comment = await this.CommentModel.find({video_id:id}).populate({        path:'user_id',
-        select:'name'})
+        path: 'user_id',
+        select: 'name',
+      });
+      const comment = await this.CommentModel.find({ video_id: id }).populate({
+        path: 'user_id',
+        select: 'name',
+      });
       return {
-        status:200,
+        status: 200,
         data,
-        comment
-      }
+        comment,
+      };
     } catch (error) {
-      throw new Error(error)
+      throw new Error(error);
     }
   }
   async acceptOrReject(body: AcceptRejectDto, userId: string, id: string) {
@@ -109,7 +114,9 @@ export class VideoService {
         // Trường hợp reject
         const findRejectVideo = await this.VideosModel.findById(id);
         if (findRejectVideo && findRejectVideo.user_id) {
-          const findUserEmailPubVideo = await this.UserModel.findById(findRejectVideo.user_id);
+          const findUserEmailPubVideo = await this.UserModel.findById(
+            findRejectVideo.user_id,
+          );
           if (findUserEmailPubVideo && findUserEmailPubVideo.email) {
             await this.emailService.sendMail(
               findUserEmailPubVideo.email,
@@ -127,7 +134,9 @@ export class VideoService {
         // Trường hợp accept
         const findAcceptVideo = await this.VideosModel.findById(id);
         if (findAcceptVideo && findAcceptVideo.user_id) {
-          const findUserEmailPubVideo = await this.UserModel.findById(findAcceptVideo.user_id);
+          const findUserEmailPubVideo = await this.UserModel.findById(
+            findAcceptVideo.user_id,
+          );
           if (findUserEmailPubVideo && findUserEmailPubVideo.email) {
             await this.emailService.sendMail(
               findUserEmailPubVideo.email,
@@ -157,7 +166,7 @@ export class VideoService {
   }
   async getAllForAdmin(userId: string, status: string) {
     try {
-      const isAdmin = await this.authService.checkAdmin(userId); 
+      const isAdmin = await this.authService.checkAdmin(userId);
       if (!isAdmin) {
         return {
           status: 403,
@@ -172,7 +181,7 @@ export class VideoService {
         query = {};
       }
       const videos = await this.VideosModel.find(query)
-        .sort({ accept: 1 }) 
+        .sort({ accept: 1 })
         .exec();
 
       return {
@@ -202,15 +211,14 @@ export class VideoService {
     }
   }
 
- async remove(id: string,userId:String) {
+  async remove(id: string, userId: string) {
     try {
-      await this.VideosModel.findByIdAndDelete(id)
-      return{
-        message: 'Xóa video thành công'
-      }
+      await this.VideosModel.findByIdAndDelete(id);
+      return {
+        message: 'Xóa video thành công',
+      };
     } catch (error) {
-      throw new Error(error)
+      throw new Error(error);
     }
   }
-
 }

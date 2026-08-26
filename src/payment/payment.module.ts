@@ -2,7 +2,16 @@ import { Module } from '@nestjs/common';
 import { PaymentService } from './payment.service';
 import { PaymentController } from './payment.controller';
 import { MongooseModule } from '@nestjs/mongoose';
-import { Booking, BookingSchema, LawyerPayment, LawyerPaymentSchema, Payment, PaymentSchema, User, UserSchema } from 'src/config/database.config';
+import {
+  Booking,
+  BookingSchema,
+  LawyerPayment,
+  LawyerPaymentSchema,
+  Payment,
+  PaymentSchema,
+  User,
+  UserSchema,
+} from 'src/config/database.config';
 import { EmailModule } from 'src/email/email.module';
 import { KeyModule } from 'src/key/key.module';
 import { JwtModule } from '@nestjs/jwt';
@@ -11,14 +20,19 @@ import { TokenModule } from 'utils/token.module';
 import { ShareModule } from 'src/shared/sharedModule';
 
 @Module({
-  imports:[
+  imports: [
     MongooseModule.forFeature([
-      {name:User.name,schema:UserSchema},
-      {name:Payment.name,schema:PaymentSchema},
-      {name:LawyerPayment.name,schema:LawyerPaymentSchema},
-      {name:Booking.name, schema:BookingSchema}
+      { name: User.name, schema: UserSchema },
+      { name: Payment.name, schema: PaymentSchema },
+      { name: LawyerPayment.name, schema: LawyerPaymentSchema },
+      { name: Booking.name, schema: BookingSchema },
     ]),
-    JwtModule.register({}),KeyModule,EmailModule,ShareModule,TokenModule,AuthModule
+    JwtModule.register({}),
+    KeyModule,
+    EmailModule,
+    ShareModule,
+    TokenModule,
+    AuthModule,
   ],
   controllers: [PaymentController],
   providers: [PaymentService],

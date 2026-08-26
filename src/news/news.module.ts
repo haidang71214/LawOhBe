@@ -11,10 +11,18 @@ import { KeyModule } from 'src/key/key.module';
 import { JwtModule } from '@nestjs/jwt';
 
 @Module({
-  imports:[MongooseModule.forFeature([
-    {name:New.name,schema:NewSchema},
-    {name:User.name,schema:UserSchema}
-  ]),JwtModule.register({}),KeyModule,EmailModule,ShareModule,TokenControllerService,AuthModule ],
+  imports: [
+    MongooseModule.forFeature([
+      { name: New.name, schema: NewSchema },
+      { name: User.name, schema: UserSchema },
+    ]),
+    JwtModule.register({}),
+    KeyModule,
+    EmailModule,
+    ShareModule,
+    TokenControllerService,
+    AuthModule,
+  ],
   controllers: [NewsController],
   providers: [NewsService],
 })

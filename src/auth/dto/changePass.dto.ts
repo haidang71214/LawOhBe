@@ -1,12 +1,12 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { IsNotEmpty } from "class-validator";
+import { ApiProperty } from '@nestjs/swagger';
+import { IsNotEmpty } from 'class-validator';
 
 export class changePass {
-@ApiProperty()
-   @IsNotEmpty()
-   newPass:String
-   
-   @ApiProperty()
-   @IsNotEmpty()
-   resetToken:String
+  @ApiProperty()
+  @IsNotEmpty()
+  newPass: string;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  resetToken: string;
 }

@@ -8,7 +8,9 @@ export class KeyService {
     try {
       return fs.readFileSync(filePath, 'utf-8');
     } catch (error) {
-      throw new Error(`Could not find key file at path: ${filePath}. Error: ${error.message}`);
+      throw new Error(
+        `Could not find key file at path: ${filePath}. Error: ${error.message}`,
+      );
     }
   }
 
@@ -18,15 +20,18 @@ export class KeyService {
   }
   getPublicKey(): string {
     const publicKeyPath = path.resolve(process.cwd(), 'keys/public.key');
-    return  this.readKeyFile(publicKeyPath);
+    return this.readKeyFile(publicKeyPath);
   }
   getRefTokenPrivateKey(): string {
-const refreshTokenPath = path.resolve(process.cwd(), 'keys/refresh_private.key');
-return this.readKeyFile(refreshTokenPath);
+    const refreshTokenPath = path.resolve(
+      process.cwd(),
+      'keys/refresh_private.key',
+    );
+    return this.readKeyFile(refreshTokenPath);
   }
 
-   getRefTokenPublicKey(): string {
-const refreshTokenPath = path.resolve(process.cwd(), 'refresh_public.key');
-return this.readKeyFile(refreshTokenPath);
+  getRefTokenPublicKey(): string {
+    const refreshTokenPath = path.resolve(process.cwd(), 'refresh_public.key');
+    return this.readKeyFile(refreshTokenPath);
   }
 }

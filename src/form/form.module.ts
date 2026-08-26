@@ -12,11 +12,20 @@ import { JwtModule } from '@nestjs/jwt';
 import { StorageModule } from 'src/storage/storage.module';
 
 @Module({
-  imports:[MongooseModule.forFeature([{
-    name: Form.name,
-    schema: FormSchema
-  }]),
-  AuthModule,JwtModule.register({}),KeyModule,EmailModule,ShareModule,TokenControllerService,StorageModule
+  imports: [
+    MongooseModule.forFeature([
+      {
+        name: Form.name,
+        schema: FormSchema,
+      },
+    ]),
+    AuthModule,
+    JwtModule.register({}),
+    KeyModule,
+    EmailModule,
+    ShareModule,
+    TokenControllerService,
+    StorageModule,
   ],
   controllers: [FormController],
   providers: [FormService],

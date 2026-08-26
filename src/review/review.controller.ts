@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, Res } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Req,
+  Res,
+} from '@nestjs/common';
 import { ReviewService } from './review.service';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { ApiBearerAuth } from '@nestjs/swagger';
@@ -10,38 +21,38 @@ import { Response } from 'express';
 export class ReviewController {
   constructor(private readonly reviewService: ReviewService) {}
 
-// tạo mới review, khi status nó done
-// nhận vô 1 cái lawyer_id
+  // tạo mới review, khi status nó done
+  // nhận vô 1 cái lawyer_id
   @Post('/:id')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  async create(@Body() createReviewDto: CreateReviewDto,
-  @Req() req, // user đánh giá, 
-  @Res() res:Response,
-  @Param('id') id:string // đánh giá cho thằng luật sư
-) {
+  async create(
+    @Body() createReviewDto: CreateReviewDto,
+    @Req() req, // user đánh giá,
+    @Res() res: Response,
+    @Param('id') id: string, // đánh giá cho thằng luật sư
+  ) {
     try {
       // khi mà nó tạo xong thì nhớ update cái chỗ rate cho luật sư =))
-      const {userId} = req.user
-      const response = await this.reviewService.create(createReviewDto,id,userId);
-      return res.status(response.status).json(response.message)
+      const { userId } = req.user;
+      const response = await this.reviewService.create(
+        createReviewDto,
+        id,
+        userId,
+      );
+      return res.status(response.status).json(response.message);
     } catch (error) {
-      throw new Error(error)
+      throw new Error(error);
     }
   }
-// lấy hết review của chính thằng luật sư đó
-  @Get("/:id")
-   async findAll( @Param('id') id:string,@Res() res:Response ) {
-   try {
-    const data = await this.reviewService.findAll(id)
-    return res.status(200).json(data)
-   } catch (error) {
-    throw new Error(error)
-   }
+  // lấy hết review của chính thằng luật sư đó
+  @Get('/:id')
+  async findAll(@Param('id') id: string, @Res() res: Response) {
+    try {
+      const data = await this.reviewService.findAll(id);
+      return res.status(200).json(data);
+    } catch (error) {
+      throw new Error(error);
+    }
   }
-
-
-
-
-
 }

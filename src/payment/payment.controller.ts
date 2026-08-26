@@ -1,4 +1,17 @@
-import { Controller, Get, Post, Body, Query, Res, HttpException, HttpStatus, Req, UseGuards, BadRequestException, Param } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Query,
+  Res,
+  HttpException,
+  HttpStatus,
+  Req,
+  UseGuards,
+  BadRequestException,
+  Param,
+} from '@nestjs/common';
 import { PaymentService } from './payment.service';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { Response } from 'express';
@@ -13,32 +26,64 @@ import { URL_PRODUCTION } from 'src/main';
 export class PaymentController {
   constructor(
     private readonly paymentService: PaymentService,
-    @InjectModel(Payment.name) private PaymentModel: Model<Payment>
+    @InjectModel(Payment.name) private PaymentModel: Model<Payment>,
   ) {}
 
   @Post('create-payment-url')
-  async createPaymentUrl(@Body() createPaymentDto: CreatePaymentDto, @Res() res: Response) {
+  async createPaymentUrl(
+    @Body() createPaymentDto: CreatePaymentDto,
+    @Res() res: Response,
+  ) {
     try {
-      const { amount, orderInfo, orderType, bankCode, clientId, lawyerId,bookingId } = createPaymentDto;
-      const { paymentUrl, txnRef } = await this.paymentService.createPaymentUrl(amount, orderInfo, orderType, bankCode, clientId, lawyerId,bookingId);
-      const existingSuccessPayment = await this.PaymentModel.findOne({ client_id: clientId, lawyer_id: lawyerId,booking_id:bookingId, status: 'success' });
+      const {
+        amount,
+        orderInfo,
+        orderType,
+        bankCode,
+        clientId,
+        lawyerId,
+        bookingId,
+      } = createPaymentDto;
+      const { paymentUrl, txnRef } = await this.paymentService.createPaymentUrl(
+        amount,
+        orderInfo,
+        orderType,
+        bankCode,
+        clientId,
+        lawyerId,
+        bookingId,
+      );
+      const existingSuccessPayment = await this.PaymentModel.findOne({
+        client_id: clientId,
+        lawyer_id: lawyerId,
+        booking_id: bookingId,
+        status: 'success',
+      });
       if (existingSuccessPayment) {
-        throw new BadRequestException('Đã có giao dịch thành công cho client và lawyer này.');
+        throw new BadRequestException(
+          'Đã có giao dịch thành công cho client và lawyer này.',
+        );
       }
-  
-      const existingPayment = await this.PaymentModel.findOne({ client_id: clientId, lawyer_id: lawyerId,booking_id:bookingId });
+
+      const existingPayment = await this.PaymentModel.findOne({
+        client_id: clientId,
+        lawyer_id: lawyerId,
+        booking_id: bookingId,
+      });
       if (existingPayment) {
         if (existingPayment.status !== 'failed') {
           await this.PaymentModel.updateOne(
             { transaction_no: txnRef },
-            { $set: { 
-              orderInfo: orderInfo, 
-              updated_at: new Date(),
-              amount: amount,
-              client_id: clientId,
-              lawyer_id: lawyerId,
-              booking_id:bookingId
-            } }
+            {
+              $set: {
+                orderInfo: orderInfo,
+                updated_at: new Date(),
+                amount: amount,
+                client_id: clientId,
+                lawyer_id: lawyerId,
+                booking_id: bookingId,
+              },
+            },
           );
         }
       } else {
@@ -47,13 +92,13 @@ export class PaymentController {
           amount: amount,
           client_id: clientId,
           lawyer_id: lawyerId,
-          booking_id:bookingId,
+          booking_id: bookingId,
           status: 'pending',
           created_at: new Date(),
           orderInfo: orderInfo,
         });
       }
-  
+
       return res.json({ paymentUrl });
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -70,26 +115,34 @@ export class PaymentController {
         const payment = await this.PaymentModel.findOneAndUpdate(
           { transaction_no: query['vnp_TxnRef'] },
           { status: 'success', payment_date: new Date() },
-          { new: true }
+          { new: true },
         );
 
         if (!payment) {
-          throw new BadRequestException('Payment not found for transaction_no: ' + query['vnp_TxnRef']);
+          throw new BadRequestException(
+            'Payment not found for transaction_no: ' + query['vnp_TxnRef'],
+          );
         }
 
         // Tự động tách hoa hồng cho luật sư (90% luật sư, 10% nền tảng)
         await this.paymentService.createLawyerPaymentSplit(payment);
-       
-        return res.redirect(`${URL_PRODUCTION}/payment-result?status=success&code=${responseCode}&txnRef=${query['vnp_TxnRef']}`);
+
+        return res.redirect(
+          `${URL_PRODUCTION}/payment-result?status=success&code=${responseCode}&txnRef=${query['vnp_TxnRef']}`,
+        );
       } else {
         await this.PaymentModel.findOneAndUpdate(
           { transaction_no: query['vnp_TxnRef'] },
-          { status: 'failed', payment_date: new Date() }
+          { status: 'failed', payment_date: new Date() },
         );
-        return res.redirect(`${URL_PRODUCTION}/payment-result?status=failed&code=${responseCode || '97'}&txnRef=${query['vnp_TxnRef']}`);
+        return res.redirect(
+          `${URL_PRODUCTION}/payment-result?status=failed&code=${responseCode || '97'}&txnRef=${query['vnp_TxnRef']}`,
+        );
       }
     } catch (error) {
-      return res.redirect(`${URL_PRODUCTION}/payment-result?status=error&message=${encodeURIComponent('Lỗi khi xử lý phản hồi VNPAY: ' + error.message)}`);
+      return res.redirect(
+        `${URL_PRODUCTION}/payment-result?status=error&message=${encodeURIComponent('Lỗi khi xử lý phản hồi VNPAY: ' + error.message)}`,
+      );
     }
   }
 
@@ -103,7 +156,7 @@ export class PaymentController {
         const payment = await this.PaymentModel.findOneAndUpdate(
           { transaction_no: orderId },
           { status: 'success', payment_date: new Date() },
-          { new: true }
+          { new: true },
         );
         if (payment) {
           await this.paymentService.createLawyerPaymentSplit(payment);
@@ -115,11 +168,12 @@ export class PaymentController {
     }
   }
 
-  
   @Get('get-payment-status/:txnRef')
   async getPaymentStatus(@Param('txnRef') txnRef: string) {
     try {
-      const payment = await this.PaymentModel.findOne({ transaction_no: txnRef });
+      const payment = await this.PaymentModel.findOne({
+        transaction_no: txnRef,
+      });
       if (!payment) {
         throw new BadRequestException('Payment not found');
       }
@@ -128,7 +182,9 @@ export class PaymentController {
         txnRef: payment.transaction_no,
       };
     } catch (error) {
-      throw new BadRequestException('Lỗi khi lấy trạng thái thanh toán: ' + error.message);
+      throw new BadRequestException(
+        'Lỗi khi lấy trạng thái thanh toán: ' + error.message,
+      );
     }
   }
 
@@ -148,15 +204,13 @@ export class PaymentController {
   @Get('/userGetPayment')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  async getUserPayments(
-    @Req() req,
-  ){
+  async getUserPayments(@Req() req) {
     try {
-      const{userId} = req.user
-      const data = await this.paymentService.getUserPayment(userId)
-      return data
+      const { userId } = req.user;
+      const data = await this.paymentService.getUserPayment(userId);
+      return data;
     } catch (error) {
-      throw new Error()
+      throw new Error();
     }
   }
 
@@ -188,15 +242,12 @@ export class PaymentController {
   }
 
   @Get('/getPaymentSuccessOrFail/:id')
-  async getPaymentById(
-    @Param('id') id:String,
-    @Res() res:Response
-  ){
+  async getPaymentById(@Param('id') id: string, @Res() res: Response) {
     try {
       const response = await this.paymentService.getPaymentSuccessOrFail(id);
-      return res.status(response.status).json(response.data) 
+      return res.status(response.status).json(response.data);
     } catch (error) {
-      throw new Error(error)
+      throw new Error(error);
     }
   }
 }
