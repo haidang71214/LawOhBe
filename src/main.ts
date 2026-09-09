@@ -1,28 +1,49 @@
+import { initTracing } from 'libs/observable';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { setupSocketIo } from './config/socket-io';
-import { ChatService } from './message/message.service';
-import { PeerServer } from 'peer';
+import { ExpressPeerServer } from 'peer';
+import { Logger } from 'nestjs-pino';
+import { AllExceptionsFilter } from 'libs/interceptor/http-exception.filter';
+import { ResponseTransformInterceptor } from 'libs/interceptor/Exception.interceptor';
 
-export const URL_PRODUCTION = 'https://lawohfe.onrender.com';
+// Initialize OpenTelemetry Tracing
+initTracing('law-ohbe');
+
 async function bootstrap() {
   try {
-    const app = await NestFactory.create(AppModule);
+    const app = await NestFactory.create(AppModule, { bufferLogs: true });
+    const logger = app.get(Logger);
+    app.useLogger(logger);
+
     const configService = app.get(ConfigService);
-    const peerServer = PeerServer({
-      path: '/peerjs',
-    });
+
+    const globalPrefix = configService.get<string>('GLOBAL_PREFIX');
+    if (globalPrefix) {
+      app.setGlobalPrefix(globalPrefix);
+    }
+
     const expressApp = app.getHttpAdapter().getInstance();
+    const httpServer = app.getHttpServer();
+    const peerServer = ExpressPeerServer(httpServer, {
+      path: '/',
+    });
     expressApp.use('/peerjs', peerServer);
-    app.useGlobalPipes(new ValidationPipe());
+
+    app.useGlobalPipes(
+      new ValidationPipe({
+        transform: true,
+        whitelist: true,
+        forbidNonWhitelisted: false,
+      }),
+    );
+    app.useGlobalFilters(new AllExceptionsFilter());
+    app.useGlobalInterceptors(new ResponseTransformInterceptor());
+
     app.enableCors({
-      origin: [
-        process.env.NODE_ENV === 'production' ? `${URL_PRODUCTION}` : '*',
-        'http://localhost:3000',
-      ],
+      origin: true,
       methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
       credentials: true,
     });
@@ -37,16 +58,19 @@ async function bootstrap() {
 
     const swagger = SwaggerModule.createDocument(app, configSwagger);
     SwaggerModule.setup('Swagger', app, swagger);
-    const chatService = app.get(ChatService);
-    setupSocketIo(app, chatService);
 
-    // Khởi động ứng dụng trên 0.0.0.0 kệ mẹ cái env vì env đéo chạy được
-    //process.env.PORT ||
-    const port = 8080; // Mặc định 10000 theo tài liệu Render
-    await app.listen(port, '0.0.0.0');
-    console.log(`Ứng dụng đang chạy trên port: http://0.0.0.0:${port}`);
-  } catch (error) {
-    console.error('Ứng dụng không khởi động được:', error.stack);
+    const port =
+      configService.get<number>('APP.PORT') ||
+      configService.get<number>('PORT') ||
+      process.env.PORT ||
+      3300;
+
+    await app.listen(port);
+    logger.log(`🚀 Application is running on: http://localhost:${port}`);
+    logger.log(`📑 Swagger Documentation: http://localhost:${port}/Swagger`);
+    logger.log(`📊 Prometheus Metrics: http://localhost:${port}/metrics`);
+  } catch (error: any) {
+    console.error('❌ Failed to start application:', error.stack || error);
     process.exit(1);
   }
 }

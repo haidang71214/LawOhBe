@@ -1,98 +1,149 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# LawOh Backend (LawOhBe)
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Backend cho nền tảng tư vấn và đặt lịch luật sư trực tuyến. Xây dựng bằng NestJS, MongoDB, Redis và hệ thống giám sát Observability (Loki, Prometheus, Grafana, OpenTelemetry).
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+---
 
-## Description
+## Tech Stack
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- **Core:** NestJS v11, TypeScript, Express
+- **Database:** MongoDB + Mongoose (Repository & Mapper Pattern)
+- **Cache & Queue:** Redis (Cache-manager, Distributed Lock), BullMQ
+- **Realtime:** Socket.IO (Chat 1-1, thông báo realtime)
+- **Authentication & Security:** JWT với thuật toán xác thực bất đối xứng RS256 (Private Key ký token, Public Key verify), Throttler Rate Limiting (Redis storage), Sanitize middleware chống NoSQL Injection, Passport
+- **Observability:**
+  - Distributed Tracing: OpenTelemetry SDK (OTLP)
+  - Metrics: Prometheus (/api/v1/metrics)
+  - Logging: Pino Logger -> Promtail -> Grafana Loki
+  - Dashboard: Grafana
+  - Healthcheck: NestJS Terminus (/api/v1/health, liveness & readiness probes)
+- **Dev Tools:** Husky, Commitlint, ESLint, Prettier, Jest
 
-## Project setup
+---
 
-```bash
-$ npm install
+## Kiến trúc dự án
+
+Dự án tách biệt giữa Libraries dùng chung (libs/) và Modules nghiệp vụ (src/modules/):
+
+```
+d:\LawOhBe
+├── libs/                  # Core & Shared modules
+│   ├── configuration/     # Cấu hình Mongo, Redis, BullMQ, Mail, Loki...
+│   ├── constant/          # Metadata, Enums, Roles
+│   ├── decorators/        # Custom decorators (@UserData, @RoleDecorator...)
+│   ├── guard/             # JWT AuthGuard (RS256 Public Key verify), RoleGuard, CustomThrottlerGuard
+│   ├── interceptor/       # Response transform, Exception filter, Logging
+│   ├── observable/        # OpenTelemetry setup, Prometheus metrics
+│   ├── repository/        # BaseRepository dùng chung cho Mongoose
+│   ├── schemas/           # Mongoose schemas & data models
+│   └── utils/             # Pagination, String, Hash helpers
+│
+└── src/
+    ├── health/            # Healthcheck module (Memory, Mongo, Redis)
+    └── modules/           # Feature modules
+        ├── auth/          # Đăng ký, đăng nhập, JWT RS256 (Asymmetric), OTP email
+        ├── users/         # Quản lý user và phân quyền
+        ├── lawyer/        # Quản lý hồ sơ luật sư, khung giờ và dịch vụ
+        ├── booking/       # Đặt lịch hẹn, chống trùng lịch bằng Redis Lock
+        ├── message/       # Chat realtime Socket.IO
+        ├── notification/  # Hệ thống thông báo
+        ├── classification/# Phân loại hồ sơ pháp lý
+        ├── review/        # Đánh giá luật sư sau phiên tư vấn
+        ├── news/          # Quản lý bài viết, tin tức
+        ├── video/         # Quản lý video bài giảng / tư vấn
+        ├── comment/       # Bình luận bài viết và video
+        ├── learn-package/ # Gói tài liệu và khoá học
+        ├── price-range/   # Khung giá tư vấn
+        └── form/          # Quản lý biểu mẫu pháp luật
 ```
 
-## Compile and run the project
+---
+
+## Chạy hạ tầng bằng Docker
+
+Toàn bộ dịch vụ hỗ trợ (MongoDB, Redis, RedisInsight, Kafka, Loki, Promtail, Prometheus, Grafana) đã được gom trong file docker-compose.provider.yaml:
 
 ```bash
-# development
-$ npm run start
+# Khởi động toàn bộ database và tools giám sát
+docker compose -f docker-compose.provider.yaml up -d
 
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+# Xem log các container
+docker compose -f docker-compose.provider.yaml logs -f
 ```
 
-## Run tests
+---
+
+## Cài đặt & Chạy ứng dụng
+
+### 1. Cài đặt dependencies
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+npm install
 ```
 
-## Deployment
+### 2. Cấu hình biến môi trường (.env)
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+Tạo file .env ở thư mục gốc:
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+```env
+PORT=3300
+GLOBAL_PREFIX=api/v1
+NODE_ENV=development
+
+# Database
+MONGO_URL=mongodb://root:password@localhost:27017/law-oh?authSource=admin
+MONGO_DB_NAME=law-oh
+REDIS_HOST=localhost
+REDIS_PORT=6379
+
+# JWT Asymmetric Keys (RS256)
+PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----\n...\n-----END RSA PRIVATE KEY-----"
+PUBLIC_KEY="-----BEGIN PUBLIC KEY-----\n...\n-----END PUBLIC KEY-----"
+
+# Cloudinary
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+```
+
+### 3. Khởi chạy
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+# Chạy dev (watch mode)
+npm run start:dev
+
+# Chạy test toàn bộ hệ thống
+npm test
+
+# Build production
+npm run build
+npm run start:prod
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+---
 
-## Resources
+## Endpoints & Tools quản trị
 
-Check out a few resources that may come in handy when working with NestJS:
+| Dịch vụ                  | URL                                  | Ghi chú                                |
+| :----------------------- | :----------------------------------- | :------------------------------------- |
+| **Swagger Docs**         | http://localhost:3300/Swagger        | Tài liệu API tương tác trực tiếp       |
+| **Health Check**         | http://localhost:3300/api/v1/health  | Kiểm tra MongoDB, Redis, RAM           |
+| **Prometheus Metrics**   | http://localhost:3300/api/v1/metrics | Dữ liệu metric cho Prometheus scrape   |
+| **Prometheus Dashboard** | http://localhost:9090                | Quản lý targets và query metrics       |
+| **Grafana**              | http://localhost:3001                | User: admin / Pass: admin              |
+| **Redis Insight**        | http://localhost:5540                | Giao diện trực quan kiểm tra key Redis |
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+---
 
-## Support
+## Testing
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+Dự án có đầy đủ unit tests cho tất cả các service và repository:
 
-## Stay in touch
+```bash
+npm test
+```
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+```text
+Test Suites: 21 passed, 21 total
+Tests:       65 passed, 65 total
+```

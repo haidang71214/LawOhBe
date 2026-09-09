@@ -1,44 +1,39 @@
 module.exports = {
-  // Kế thừa rules cơ bản từ bộ quy tắc Conventional Commits
+  // Inherit base rules from Conventional Commits
   extends: ['@commitlint/config-conventional'],
 
-  // Custom parser để định nghĩa format commit header
+  // Custom parser to define commit header format
   parserPreset: {
     parserOpts: {
-      // Regex parse commit message
+      // Regex to parse commit message
       // Format: <type>(<scope>): <subject>
-      // Ví dụ: feat(auth): thêm chức năng đăng nhập với JWT
+      // Example: feat(auth): add login functionality with JWT
       headerPattern: /^(\w+)\(([^)]+)\): (.*)$/,
 
-      // Ánh xạ các group trong regex vào field của commitlint
+      // Map regex capture groups to commitlint fields
       headerCorrespondence: ['type', 'scope', 'subject'],
     },
   },
 
-  // Các rules để enforce commit message
+  // Commit message enforcement rules
   rules: {
-    // Chỉ cho phép type thuộc danh sách này
-    // feat = thêm chức năng, fix = sửa bug, docs = tài liệu,
-    // style = format code, refactor = tối ưu, test = test code,
-    // chore = việc vặt, revert = rollback commit
+    // Allowed commit types
+    // feat, fix, docs, style, refactor, test, chore, revert
     'type-enum': [
-      2, // level 2 = error (reject commit nếu sai)
+      2, // level 2 = error (reject commit if invalid)
       'always',
       ['feat', 'fix', 'docs', 'style', 'refactor', 'test', 'chore', 'revert'],
     ],
-    // tóm lại là chỉ cho cái đống này vô thôi, viết rườm rà là cút.
-    // Header (toàn bộ commit message dòng đầu) tối thiểu 10 ký tự
+    // Header minimum length of 10 characters
     'header-min-length': [2, 'always', 10],
 
-    // Header tối đa 160 ký tự
+    // Header maximum length of 160 characters
     'header-max-length': [2, 'always', 160],
 
-    // Body (nội dung chi tiết commit) mỗi dòng tối đa 120 ký tự
+    // Body max line length of 120 characters
     'body-max-line-length': [2, 'always', 120],
 
-    // Subject (phần mô tả ngắn) không bị ép theo style nào
-    // Đang disable (0 = off), nên có thể viết hoa/viết thường tự do
-    // Ví dụ: "thêm chức năng login" hoặc "Thêm chức năng login" đều pass
+    // Subject casing (off)
     'subject-case': [
       0, // off
       'never',

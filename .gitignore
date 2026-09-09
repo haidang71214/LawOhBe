@@ -57,3 +57,7 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 # AI Agent skills & customizations
 .agents/
+
+# Docker volumes
+docker/docker_data/
+
