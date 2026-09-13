@@ -63,10 +63,11 @@ jobs:
             docker run -d \
               --name lawoh-container \
               --restart unless-stopped \
-              --network law_ohbe_net \
+              --network law-ohbe-provider_law_ohbe_net \
               --env-file .env \
               -p 3300:3300 \
               lawoh
+
 
             # Reload Nginx gateway
             docker exec law_nginx_gateway nginx -s reload || true
