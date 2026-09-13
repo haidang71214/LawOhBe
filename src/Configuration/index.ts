@@ -16,7 +16,7 @@ export class Configuration extends BaseConfiguration {
   @ValidateNested()
   @Type(() => AppConfiguration)
   APP = new AppConfiguration();
-
+  //ok
   @ValidateNested()
   @Type(() => MongoConfiguration)
   MONGO_CONFIG = new MongoConfiguration();
