@@ -145,5 +145,7 @@ services:
 
 networks:
   law_ohbe_net:
+    name: law_ohbe_net
     driver: bridge
+
 
