@@ -69,5 +69,5 @@ jobs:
               lawoh
 
 
-            # Reload Nginx gateway
-            docker exec law_nginx_gateway nginx -s reload || true
+            # Restart Nginx gateway to pick up any config changes
+            docker restart law_nginx_gateway || true
