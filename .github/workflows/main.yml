@@ -46,16 +46,16 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: 24700
           script: |
-            cd /root/lawohprojectBe/testdeploydockercicd
+            cd /root/LawOhBe
             git fetch origin
             git checkout master
             git reset --hard origin/master
 
             # Khởi động các infrastructure services (DB, Redis, Kafka, Nginx...)
-            docker-compose -f docker-compose.provider.yaml up -d
+            docker compose -f docker-compose.provider.yaml up -d
 
             # Build backend container image
-            docker build -t lawoh .
+            docker build -f dockerfile -t lawoh .
 
             # Khởi động lại backend container
             docker stop lawoh-container || true
