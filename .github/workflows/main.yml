@@ -2,9 +2,9 @@ name: CI/CD Pipeline & Deployment
 
 on:
   push:
-    branches: [production]
+    branches: [master]
   pull_request:
-    branches: [production]
+    branches: [master]
 
 jobs:
   test-and-build:
@@ -35,7 +35,7 @@ jobs:
   deploy:
     name: Deploy to Production Server
     needs: test-and-build
-    if: github.ref == 'refs/heads/production' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
       - name: Deploy via SSH
@@ -48,8 +48,8 @@ jobs:
           script: |
             cd /root/lawohprojectBe/testdeploydockercicd
             git fetch origin
-            git checkout production
-            git reset --hard origin/production
+            git checkout master
+            git reset --hard origin/master
 
             # Khởi động các infrastructure services (DB, Redis, Kafka, Nginx...)
             docker-compose -f docker-compose.provider.yaml up -d
