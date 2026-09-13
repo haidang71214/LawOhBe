@@ -1,13 +1,45 @@
-name: Dockerized App Deployment
+name: CI/CD Pipeline & Deployment
+
 on:
   push:
     branches: [production]
+  pull_request:
+    branches: [production]
+
 jobs:
-  deploy:
+  test-and-build:
+    name: Run Tests & Build Validation
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy using ssh
-        uses: appleboy/ssh-action@master
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Linter
+        run: npm run lint
+
+      - name: Run Unit Tests
+        run: npm test -- --passWithNoTests
+
+      - name: Check Build
+        run: npm run build
+
+  deploy:
+    name: Deploy to Production Server
+    needs: test-and-build
+    if: github.ref == 'refs/heads/production' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
@@ -17,9 +49,24 @@ jobs:
             cd /root/lawohprojectBe/testdeploydockercicd
             git fetch origin
             git checkout production
-            git pull
-            docker-compose build
-            docker build -t lawoh
-            docker stop lawoh-container || true  
-            docker rm lawoh-container || true   
-            docker run -d --name lawoh-container -p 4000:3000 lawoh
+            git reset --hard origin/production
+
+            # Khởi động các infrastructure services (DB, Redis, Kafka, Nginx...)
+            docker-compose -f docker-compose.provider.yaml up -d
+
+            # Build backend container image
+            docker build -t lawoh .
+
+            # Khởi động lại backend container
+            docker stop lawoh-container || true
+            docker rm lawoh-container || true
+            docker run -d \
+              --name lawoh-container \
+              --restart unless-stopped \
+              --network law_ohbe_net \
+              --env-file .env \
+              -p 3300:3300 \
+              lawoh
+
+            # Reload Nginx gateway
+            docker exec law_nginx_gateway nginx -s reload || true
