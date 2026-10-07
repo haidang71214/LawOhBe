@@ -25,6 +25,18 @@ services:
     restart: unless-stopped
     networks:
       - law_ohbe_net
+  tempo:
+    image: grafana/tempo:2.6.1
+    container_name: tempo
+    command: ['-config.file=/etc/tempo.yaml']
+    volumes:
+      - ./docker/tempo.yaml:/etc/tempo.yaml
+      - ./docker/docker_data/tempo_data:/var/tempo
+    ports:
+      - '3200:3200' # Tempo HTTP
+      - '4318:4318' # OTLP HTTP
+    networks:
+      - law_ohbe_net
 
   redis-insight:
     image: redis/redisinsight:latest
@@ -95,6 +107,7 @@ services:
       - ./docker/docker_data/prometheus_data:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yaml'
+      - '--storage.tsdb.path=/prometheus'
     extra_hosts:
       - 'host.docker.internal:host-gateway'
     restart: unless-stopped
