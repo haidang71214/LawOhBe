@@ -688,7 +688,7 @@ export class UsersService {
             Tài khoản của bạn đã được chuyển sang vai trò <strong>Luật sư</strong>. Hồ sơ, số năm kinh nghiệm và chứng chỉ của bạn đã sẵn sàng hiển thị trên danh bạ luật sư để tiếp nhận khách hàng đặt lịch tư vấn.
           </p>
           <div style="margin: 28px 0; text-align: center;">
-            <a href="https://lawoh.com/update-profile" style="background-color: #4f46e5; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px; display: inline-block;">
+            <a href="${process.env.CLIENT_URL || 'https://lawoh.io.vn'}/update-profile" style="background-color: #4f46e5; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px; display: inline-block;">
               Xem & Cập nhật Hồ sơ Luật sư
             </a>
           </div>
@@ -790,7 +790,7 @@ export class UsersService {
           </p>
 
           <div style="margin: 28px 0; text-align: center;">
-            <a href="https://lawoh.com/update-profile" style="background-color: #ef4444; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px; display: inline-block;">
+            <a href="${process.env.CLIENT_URL || 'https://lawoh.io.vn'}/update-profile" style="background-color: #ef4444; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px; display: inline-block;">
               Cập nhật & Nộp lại Hồ sơ
             </a>
           </div>
